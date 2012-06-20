@@ -1,4 +1,13 @@
 function Map( canvasId, size, data, descriptionId ) {
+    function ipStringFromInteger( ip ) {
+        return (
+            ( ( ip >> 24 ) & 0xFF )
+            + '.' + ( ( ip >> 16 ) & 0xFF )
+            + '.' + ( ( ip >> 8 ) & 0xFF )
+            + '.' + ( ip & 0xFF )
+        );
+    }
+
     function Ranges( ranges ) {
         var r = [];
 
@@ -13,22 +22,34 @@ function Map( canvasId, size, data, descriptionId ) {
         return r;
     }
 
-    function Hues( countries ) {
-        var hues = new Object();
-
-        countries = Object.keys( countries );
-
-        $.each( countries, function( index, countryCode ) {
-            hues[ countryCode ] = 360 * index / countries.length;
-        } );
-
-        return hues;
+    function Country( code, name, hue ) {
+        return {
+            code: code,
+            name: name,
+            hue: hue,
+        };
     }
 
-    function Square( x, y, countries ) {
+    function Countries( countries ) {
+        var c = new Object();
+
+        var countryCodes = Object.keys( countries );
+
+        $.each( countryCodes, function( index, countryCode ) {
+            var countryName = countries[ countryCode ];
+            var hue = 360 * index / countryCodes.length;
+            c[ countryCode ] = Country( countryCode, countryName, hue );
+        } );
+
+        return c;
+    }
+
+    function Square( x, y, firstIp, lastIp, countries ) {
         return {
             x: x,
             y: y,
+            firstIp: firstIp,
+            lastIp: lastIp,
             countries: countries,
             mostRepresentedCountry: ( function() {
                 var bestCountryCode = '';
@@ -44,8 +65,25 @@ function Map( canvasId, size, data, descriptionId ) {
                 return bestCountryCode;
             } )( countries ),
 
-            getDescription: function() {
-                return '<p>' + this.mostRepresentedCountry + '</p>';
+            getDescription: function( allCountries ) {
+                // Sort countries by descending number of addresses
+                var sortedCountries = [];
+                for( var countryCode in this.countries ) {
+                    sortedCountries.push( [ countryCode, this.countries[ countryCode ] ] );
+                }
+                sortedCountries.sort( function(a, b) { return b[1] - a[1] } );
+
+                var countries = "";
+                for( var index in sortedCountries ) {
+                    var countryCode = sortedCountries[ index ][ 0 ];
+                    countries += '<li>' + allCountries[ countryCode ].name + ': ' + this.countries[ countryCode ] + ' addresses</li>';
+                }
+
+                return (
+                    '<p>IP addresses:' + ipStringFromInteger( this.firstIp ) + ' to ' + ipStringFromInteger( this.lastIp ) + '</p>'
+                    + '<p>Countries:</p>'
+                    + countries
+                );
             },
         };
     }
@@ -84,7 +122,7 @@ function Map( canvasId, size, data, descriptionId ) {
             }
 
             var xy = d2xy( size, d );
-            squares.push( Square( xy[ 0 ], xy[ 1 ], countries ) );
+            squares.push( Square( xy[ 0 ], xy[ 1 ], firstIpInSquare, lastIpInSquare, countries ) );
         }
 
         return squares;
@@ -94,7 +132,7 @@ function Map( canvasId, size, data, descriptionId ) {
         canvas: document.getElementById( canvasId ),
         size: size,
         squares: Squares( size, Ranges( data.ranges ) ),
-        hues: Hues( data.countries ),
+        countries: Countries( data.countries ),
 
         draw: function() {
             var ctx = this.canvas.getContext( '2d' );
@@ -108,7 +146,7 @@ function Map( canvasId, size, data, descriptionId ) {
                 if( bestCountryCode == '' ) {
                     color = 'black';
                 } else {
-                    color = '#' + hsvToHex( this.hues[ bestCountryCode ], 1, 1 );
+                    color = '#' + hsvToHex( this.countries[ bestCountryCode ].hue, 1, 1 );
                 }
                 ctx.fillStyle =  color;
 
@@ -120,7 +158,7 @@ function Map( canvasId, size, data, descriptionId ) {
             x = Math.floor( this.size * x / this.canvas.width );
             y = Math.floor( this.size * y / this.canvas.height );
             var d = xy2d( this.size, x, y );
-            return this.squares[ d ].getDescription();
+            return this.squares[ d ].getDescription( this.countries );
         }
     };
 

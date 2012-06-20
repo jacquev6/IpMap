@@ -25,6 +25,27 @@ function Map( canvasId, size, data ) {
         return hues;
     }
 
+    function Square( x, y, countries ) {
+        return {
+            x: x,
+            y: y,
+            countries: countries,
+            mostRepresentedCountry: ( function() {
+                var bestCountryCode = '';
+                var bestNumberOfIps = 0;
+
+                $.each( countries, function( countryCode, numberOfIps ) {
+                    if( numberOfIps > bestNumberOfIps ) {
+                        bestNumberOfIps = numberOfIps;
+                        bestCountryCode = countryCode;
+                    }
+                } );
+
+                return bestCountryCode;
+            } )( countries ),
+        };
+    }
+
     function Squares( size, ranges ) {
         var squares = [];
 
@@ -33,7 +54,7 @@ function Map( canvasId, size, data ) {
 
         var rangeIndex = 0;
         for( var d = 0; d < numberOfSquares; ++d ) {
-            var square = new Object();
+            var countries = new Object();
 
             var firstIpInSquare = d * ipsPerSquare;
             var lastIpInSquare = ( d + 1 ) * ipsPerSquare - 1;
@@ -45,11 +66,11 @@ function Map( canvasId, size, data ) {
                     break;
                 }
 
-                if( square[ range.countryCode ] === undefined ) {
-                    square[ range.countryCode ] = 0;
+                if( countries[ range.countryCode ] === undefined ) {
+                    countries[ range.countryCode ] = 0;
                 }
 
-                square[ range.countryCode ] += Math.min( range.lastIp, lastIpInSquare ) - Math.max( range.firstIp, firstIpInSquare ) + 1;
+                countries[ range.countryCode ] += Math.min( range.lastIp, lastIpInSquare ) - Math.max( range.firstIp, firstIpInSquare ) + 1;
 
                 if( range.lastIp > lastIpInSquare ) {
                     break;
@@ -58,13 +79,14 @@ function Map( canvasId, size, data ) {
                 ++rangeIndex;
             }
 
-            squares.push( square );
+            var xy = d2xy( size, d );
+            squares.push( Square( xy[ 0 ], xy[ 1 ], countries ) );
         }
 
         return squares;
     }
 
-    return new Object( {
+    return {
         canvasId: canvasId,
         size: size,
         squares: Squares( size, Ranges( data.ranges ) ),
@@ -75,14 +97,9 @@ function Map( canvasId, size, data ) {
             var ctx = canvas.getContext( '2d' );
 
             for( var d in this.squares ) {
-                var bestCountryCode = '';
-                var bestNumberOfIps = 0;
-                $.each( this.squares[ d ], function( countryCode, numberOfIps ) {
-                    if( numberOfIps > bestNumberOfIps ) {
-                        bestNumberOfIps = numberOfIps;
-                        bestCountryCode = countryCode;
-                    }
-                } );
+                var square = this.squares[ d ];
+
+                bestCountryCode = square.mostRepresentedCountry;
 
                 var color;
                 if( bestCountryCode == '' ) {
@@ -92,10 +109,8 @@ function Map( canvasId, size, data ) {
                 }
                 ctx.fillStyle =  color;
 
-                var xy = d2xy( this.size, d );
-                ctx.fillRect( xy[ 0 ] * canvas.width / this.size, xy[ 1 ] * canvas.height / this.size, canvas.width / this.size, canvas.height / this.size );
+                ctx.fillRect( square.x * canvas.width / this.size, square.y * canvas.height / this.size, canvas.width / this.size, canvas.height / this.size );
             }
         },
-
-    } );
+    };
 }

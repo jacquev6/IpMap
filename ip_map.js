@@ -159,17 +159,43 @@ function Map( canvasId, size, data, descriptionId ) {
             y = Math.floor( this.size * y / this.canvas.height );
             var d = xy2d( this.size, x, y );
             return this.squares[ d ].getDescription( this.countries );
-        }
+        },
+
+        zoomIn: function( x, y ) {
+            x = Math.floor( this.size * x / this.canvas.width );
+            y = Math.floor( this.size * y / this.canvas.height );
+
+            console.log( "Zoom in", x, y );
+        },
+
+        zoomOut:function( x, y ) {
+            x = Math.floor( this.size * x / this.canvas.width );
+            y = Math.floor( this.size * y / this.canvas.height );
+
+            console.log( "Zoom out", x, y );
+        },
     };
 
-    $( '#' + canvasId ).mousemove( function( e ) {
+    var canvas = $( '#' + canvasId );
+    canvas.mousemove( function( e ) {
         var x = e.pageX - this.offsetLeft;
         var y = e.pageY - this.offsetTop;
         $( '#' + descriptionId ).html( map.getDescription( x, y ) );
     } );
 
-    $( '#' + canvasId ).mouseleave( function( e ) {
+    canvas.mouseleave( function( e ) {
         $( '#' + descriptionId ).html( "" );
+    } );
+
+    canvas.mousewheel( function( e, delta ) {
+        var x = e.pageX - this.offsetLeft;
+        var y = e.pageY - this.offsetTop;
+
+        if( delta > 0 ) {
+            map.zoomIn( x, y );
+        } else {
+            map.zoomOut( x, y );
+        }
     } );
 
     return map;

@@ -1,4 +1,4 @@
-function Map( canvasId, size, data ) {
+function Map( canvasId, size, data, descriptionId ) {
     function Ranges( ranges ) {
         var r = [];
 
@@ -43,6 +43,10 @@ function Map( canvasId, size, data ) {
 
                 return bestCountryCode;
             } )( countries ),
+
+            getDescription: function() {
+                return '<p>' + this.mostRepresentedCountry + '</p>';
+            },
         };
     }
 
@@ -86,15 +90,14 @@ function Map( canvasId, size, data ) {
         return squares;
     }
 
-    return {
-        canvasId: canvasId,
+    var map = {
+        canvas: document.getElementById( canvasId ),
         size: size,
         squares: Squares( size, Ranges( data.ranges ) ),
         hues: Hues( data.countries ),
 
         draw: function() {
-            var canvas = document.getElementById( this.canvasId );
-            var ctx = canvas.getContext( '2d' );
+            var ctx = this.canvas.getContext( '2d' );
 
             for( var d in this.squares ) {
                 var square = this.squares[ d ];
@@ -109,8 +112,27 @@ function Map( canvasId, size, data ) {
                 }
                 ctx.fillStyle =  color;
 
-                ctx.fillRect( square.x * canvas.width / this.size, square.y * canvas.height / this.size, canvas.width / this.size, canvas.height / this.size );
+                ctx.fillRect( square.x * this.canvas.width / this.size, square.y * this.canvas.height / this.size, this.canvas.width / this.size, this.canvas.height / this.size );
             }
         },
+
+        getDescription: function( x, y ) {
+            x = Math.floor( this.size * x / this.canvas.width );
+            y = Math.floor( this.size * y / this.canvas.height );
+            var d = xy2d( this.size, x, y );
+            return this.squares[ d ].getDescription();
+        }
     };
+
+    $( '#' + canvasId ).mousemove( function( e ) {
+        var x = e.pageX - this.offsetLeft;
+        var y = e.pageY - this.offsetTop;
+        $( '#' + descriptionId ).html( map.getDescription( x, y ) );
+    } );
+
+    $( '#' + canvasId ).mouseleave( function( e ) {
+        $( '#' + descriptionId ).html( "" );
+    } );
+
+    return map;
 }

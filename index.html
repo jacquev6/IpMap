@@ -13,7 +13,7 @@
 <script type="text/javascript">
     $( document ).ready( function() {
         $.get( 'data.json', function( data, textStatus, jqXHR ) {
-            Map( 'map', 32, data ).draw();
+            Map( 'map', 32, data, 'description' ).draw();
         }, 'json' );
     } );
 </script>
@@ -22,6 +22,7 @@
 <body>
 
 <canvas id="map" width="512" height="512"></canvas>
+<div id="description"></div>
 
 </body>
 </html>

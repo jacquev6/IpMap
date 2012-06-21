@@ -88,51 +88,53 @@ function Map( canvasId, size, data, descriptionId ) {
         };
     }
 
-    function Squares( size, ranges ) {
-        var squares = [];
-
-        var numberOfSquares = size * size;
-        var ipsPerSquare = 0x100000000 / numberOfSquares;
-
-        var rangeIndex = 0;
-        for( var d = 0; d < numberOfSquares; ++d ) {
-            var countries = new Object();
-
-            var firstIpInSquare = d * ipsPerSquare;
-            var lastIpInSquare = ( d + 1 ) * ipsPerSquare - 1;
-
-            while( rangeIndex < ranges.length ) {
-                var range = ranges[ rangeIndex ];
-
-                if( range.firstIp > lastIpInSquare ) {
-                    break;
-                }
-
-                if( countries[ range.countryCode ] === undefined ) {
-                    countries[ range.countryCode ] = 0;
-                }
-
-                countries[ range.countryCode ] += Math.min( range.lastIp, lastIpInSquare ) - Math.max( range.firstIp, firstIpInSquare ) + 1;
-
-                if( range.lastIp > lastIpInSquare ) {
-                    break;
-                }
-
-                ++rangeIndex;
-            }
-
-            var xy = d2xy( size, d );
-            squares.push( Square( xy[ 0 ], xy[ 1 ], firstIpInSquare, lastIpInSquare, countries ) );
-        }
-
-        return squares;
-    }
-
     var map = {
         canvas: document.getElementById( canvasId ),
         size: size,
-        squares: Squares( size, Ranges( data.ranges ) ),
+        ranges: Ranges( data.ranges ),
         countries: Countries( data.countries ),
+
+        recompute: function() {
+            this.recomputeSquares();
+        },
+
+        recomputeSquares: function() {
+            this.squares = [];
+
+            var numberOfSquares = this.size * this.size;
+            var ipsPerSquare = 0x100000000 / numberOfSquares;
+
+            var rangeIndex = 0;
+            for( var d = 0; d < numberOfSquares; ++d ) {
+                var countries = new Object();
+
+                var firstIpInSquare = d * ipsPerSquare;
+                var lastIpInSquare = ( d + 1 ) * ipsPerSquare - 1;
+
+                while( rangeIndex < this.ranges.length ) {
+                    var range = this.ranges[ rangeIndex ];
+
+                    if( range.firstIp > lastIpInSquare ) {
+                        break;
+                    }
+
+                    if( countries[ range.countryCode ] === undefined ) {
+                        countries[ range.countryCode ] = 0;
+                    }
+
+                    countries[ range.countryCode ] += Math.min( range.lastIp, lastIpInSquare ) - Math.max( range.firstIp, firstIpInSquare ) + 1;
+
+                    if( range.lastIp > lastIpInSquare ) {
+                        break;
+                    }
+
+                    ++rangeIndex;
+                }
+
+                var xy = d2xy( size, d );
+                this.squares.push( Square( xy[ 0 ], xy[ 1 ], firstIpInSquare, lastIpInSquare, countries ) );
+            }
+        },
 
         draw: function() {
             var ctx = this.canvas.getContext( '2d' );
@@ -175,6 +177,8 @@ function Map( canvasId, size, data, descriptionId ) {
             console.log( "Zoom out", x, y );
         },
     };
+
+    map.recompute();
 
     var canvas = $( '#' + canvasId );
     canvas.mousemove( function( e ) {

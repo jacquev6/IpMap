@@ -13,19 +13,17 @@
 <script type="text/javascript" src="ip_map.js"></script>
 <script type="text/javascript">
     $( document ).ready( function() {
-        $.get( 'data.json', function( data, textStatus, jqXHR ) {
-            Map( 'map', 64, data, 'description' ).draw();
-        }, 'json' );
+        IpMap( 'map', 512, 16 );
     } );
 </script>
 
 <style type="text/css">
-#map {
+#map_canvas {
     float: left;
     margin: 50px;
 }
 
-#description {
+#map_desc {
     float: left;
 }
 </style>
@@ -33,8 +31,7 @@
 </head>
 <body>
 
-<canvas id="map" width="512" height="512"></canvas>
-<div id="description"></div>
+<div id="map"></div>
 
 </body>
 </html>

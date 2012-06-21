@@ -1,4 +1,18 @@
-function Map( canvasId, size, data, descriptionId ) {
+function RainbowDataSource() {
+    return {
+        resolution: 128,
+        get: function( low, high ) {
+            var fraction = ( low + high ) / ( this.resolution * this.resolution * 2 );
+            var color = hsvToHex( 360 * fraction, 0.5, 1 );
+            return {
+                color: '#' + color,
+                description: '<p>' + low + ' -> ' + high + '</p>',
+            };
+        }
+    };
+}
+
+function IpCountryDataSource( data ) {
     function ipStringFromInteger( ip ) {
         return (
             ( ( ip >> 24 ) & 0xFF )
@@ -22,14 +36,6 @@ function Map( canvasId, size, data, descriptionId ) {
         return r;
     }
 
-    function Country( code, name, hue ) {
-        return {
-            code: code,
-            name: name,
-            hue: hue,
-        };
-    }
-
     function Countries( countries ) {
         var c = new Object();
 
@@ -38,169 +44,275 @@ function Map( canvasId, size, data, descriptionId ) {
         $.each( countryCodes, function( index, countryCode ) {
             var countryName = countries[ countryCode ];
             var hue = 360 * index / countryCodes.length;
-            c[ countryCode ] = Country( countryCode, countryName, hue );
+            c[ countryCode ] = {
+                code: countryCode,
+                name: countryName,
+                hue: hue,
+            };
         } );
 
         return c;
     }
 
-    function Square( x, y, firstIp, lastIp, countries ) {
-        return {
-            x: x,
-            y: y,
-            firstIp: firstIp,
-            lastIp: lastIp,
-            countries: countries,
-            mostRepresentedCountry: ( function() {
-                var bestCountryCode = '';
-                var bestNumberOfIps = 0;
+    return {
+        resolution: 65536,
+        reset: function() {
+            this.rangeIndex = 0;
+        },
+        get: function( low, high ) {
+            var countries = {};
+            var bestCountryScore = 0;
+            var bestCountryCode = '';
 
-                $.each( countries, function( countryCode, numberOfIps ) {
-                    if( numberOfIps > bestNumberOfIps ) {
-                        bestNumberOfIps = numberOfIps;
-                        bestCountryCode = countryCode;
-                    }
-                } );
+            while( this.rangeIndex < this.ranges.length ) {
+                var range = this.ranges[ this.rangeIndex ];
 
-                return bestCountryCode;
-            } )( countries ),
-
-            getDescription: function( allCountries ) {
-                // Sort countries by descending number of addresses
-                var sortedCountries = [];
-                for( var countryCode in this.countries ) {
-                    sortedCountries.push( [ countryCode, this.countries[ countryCode ] ] );
-                }
-                sortedCountries.sort( function(a, b) { return b[1] - a[1] } );
-
-                var countries = "";
-                for( var index in sortedCountries ) {
-                    var countryCode = sortedCountries[ index ][ 0 ];
-                    countries += '<li>' + allCountries[ countryCode ].name + ': ' + this.countries[ countryCode ] + ' addresses</li>';
+                if( range.firstIp > high ) {
+                    break;
                 }
 
-                return (
-                    '<p>IP addresses:' + ipStringFromInteger( this.firstIp ) + ' to ' + ipStringFromInteger( this.lastIp ) + '</p>'
-                    + '<p>Countries:</p>'
-                    + countries
-                );
-            },
-        };
-    }
+                if( countries[ range.countryCode ] === undefined ) {
+                    countries[ range.countryCode ] = 0;
+                }
 
-    var map = {
-        canvas: document.getElementById( canvasId ),
-        size: size,
-        ranges: Ranges( data.ranges ),
-        countries: Countries( data.countries ),
+                countries[ range.countryCode ] += Math.min( range.lastIp, high ) - Math.max( range.firstIp, low ) + 1;
 
-        recompute: function() {
-            this.recomputeSquares();
+                if( countries[ range.countryCode ] > bestCountryScore ) {
+                    bestCountryScore = countries[ range.countryCode ];
+                    bestCountryCode = range.countryCode;
+                }
+
+                if( range.lastIp > high ) {
+                    break;
+                }
+
+                ++this.rangeIndex;
+            }
+
+            var color;
+            if( bestCountryCode == '' ) {
+                color = '#222';
+            } else {
+                color = '#' + hsvToHex( this.countries[ bestCountryCode ].hue, bestCountryScore / ( high - low + 1 ), 1 );
+            }
+
+            var description = '<p>Addresses ' + ipStringFromInteger( low ) + ' to ' + ipStringFromInteger( high ) + '</p><ul>';
+            for( countryCode in countries ) {
+                var score = countries[ countryCode ];
+                description += '<li>' + this.countries[ countryCode ].name + ': ' + score + ' addresses</li>';
+            }
+            description += '</ul>';
+
+            return {
+                color: color,
+                description: description,
+            };
         },
 
-        recomputeSquares: function() {
-            this.squares = [];
+        ranges: Ranges( data.ranges ),
+        countries: Countries( data.countries ),
+        rangeIndex: 0,
+    };
+};
 
-            var numberOfSquares = this.size * this.size;
-            var ipsPerSquare = 0x100000000 / numberOfSquares;
+function HilbertCurve( id, size, resolution, source ) {
+    curve = {
+        id: id,
+        size: size,
+        resolution: resolution,
+        source: source,
+        offset: { x: 0, y: 0 },
+        level: resolution,
 
-            var rangeIndex = 0;
-            for( var d = 0; d < numberOfSquares; ++d ) {
-                var countries = new Object();
+        // level in [ resolution, size / resolution / 2 ]
+        // offset in [ 0, level - resolution ]
+        // physical in [ 0, size - 1 ]
+        // logical in [ 0, resolution - 1 ]
+        // distance in [ 0, 2 ** level -1 ]
 
-                var firstIpInSquare = d * ipsPerSquare;
-                var lastIpInSquare = ( d + 1 ) * ipsPerSquare - 1;
-
-                while( rangeIndex < this.ranges.length ) {
-                    var range = this.ranges[ rangeIndex ];
-
-                    if( range.firstIp > lastIpInSquare ) {
-                        break;
-                    }
-
-                    if( countries[ range.countryCode ] === undefined ) {
-                        countries[ range.countryCode ] = 0;
-                    }
-
-                    countries[ range.countryCode ] += Math.min( range.lastIp, lastIpInSquare ) - Math.max( range.firstIp, firstIpInSquare ) + 1;
-
-                    if( range.lastIp > lastIpInSquare ) {
-                        break;
-                    }
-
-                    ++rangeIndex;
-                }
-
-                var xy = d2xy( size, d );
-                this.squares.push( Square( xy[ 0 ], xy[ 1 ], firstIpInSquare, lastIpInSquare, countries ) );
+        physicalToLogical: function( px, py ) {
+            if( py === undefined ) {
+                py = px.py;
+                px = px.px;
             }
+            return {
+                lx: Math.floor( this.resolution * px / this.size ),
+                ly: Math.floor( this.resolution * py / this.size ),
+            };
+        },
+
+        physicalToLogicalHalf: function( px, py ) {
+            if( py === undefined ) {
+                py = px.py;
+                px = px.px;
+            }
+            return {
+                lhx: Math.round( this.resolution * px / this.size ),
+                lhy: Math.round( this.resolution * py / this.size ),
+            };
+        },
+
+        logicalToPhysical: function( lx, ly ) {
+            if( ly === undefined ) {
+                ly = lx.ly;
+                lx = lx.lx;
+            }
+            return {
+                px: lx * this.size / this.resolution,
+                py: ly * this.size / this.resolution,
+            };
+        },
+
+        logicalToDistance: function( lx, ly ) {
+            if( ly === undefined ) {
+                ly = lx.ly;
+                lx = lx.lx;
+            }
+            return xy2d( this.level, lx + this.offset.x, ly + this.offset.y );
         },
 
         draw: function() {
-            var ctx = this.canvas.getContext( '2d' );
+            var ctx = document.getElementById( this.id + '_canvas' ).getContext( '2d' );
 
-            for( var d in this.squares ) {
-                var square = this.squares[ d ];
+            ctx.fillStyle = 'grey';
+            ctx.fillRect( 0, 0, this.size, this.size );
 
-                bestCountryCode = square.mostRepresentedCountry;
+            for( var lx = 0; lx < this.resolution; ++lx ) {
+                for( var ly = 0; ly < this.resolution; ++ly ) {
+                    var square = this.squares[ lx ][ ly ];
 
-                var color;
-                if( bestCountryCode == '' ) {
-                    color = 'black';
-                } else {
-                    color = '#' + hsvToHex( this.countries[ bestCountryCode ].hue, 1, 1 );
+                    ctx.fillStyle = square.color;
+                    var p = this.logicalToPhysical( lx, ly );
+                    ctx.fillRect( p.px, p.py, this.size / this.resolution, this.size / this.resolution );
                 }
-                ctx.fillStyle =  color;
+            }
 
-                ctx.fillRect( square.x * this.canvas.width / this.size, square.y * this.canvas.height / this.size, this.canvas.width / this.size, this.canvas.height / this.size );
+            ctx.beginPath();
+            ctx.fillStyle = 'black';
+            for( var lx = 0; lx < this.resolution - 1; ++lx ) {
+                for( var ly = 0; ly < this.resolution; ++ly ) {
+                    if( Math.abs( this.squares[ lx ][ ly ].distance - this.squares[ lx + 1 ][ ly ].distance ) > 1 ) {
+                        var p1 = this.logicalToPhysical( lx + 1, ly );
+                        var p2 = this.logicalToPhysical( lx + 1, ly + 1 );
+                        ctx.moveTo( p1.px, p1.py );
+                        ctx.lineTo( p2.px, p2.py );
+                    }
+                }
+            }
+            for( var lx = 0; lx < this.resolution; ++lx ) {
+                for( var ly = 0; ly < this.resolution - 1; ++ly ) {
+                    if( Math.abs( this.squares[ lx ][ ly ].distance - this.squares[ lx ][ ly + 1 ].distance ) > 1 ) {
+                        var p1 = this.logicalToPhysical( lx, ly + 1 );
+                        var p2 = this.logicalToPhysical( lx + 1, ly + 1 );
+                        ctx.moveTo( p1.px, p1.py );
+                        ctx.lineTo( p2.px, p2.py );
+                    }
+                }
+            }
+            ctx.stroke();
+        },
+
+        getDescription: function( px, py ) {
+            var l = this.physicalToLogical( px, py );
+            return this.squares[ l.lx ][ l.ly ].description;
+        },
+
+        zoomIn: function( px, py ) {
+            this.tryZoom( px, py, 2 );
+        },
+
+        zoomOut:function( px, py ) {
+            this.tryZoom( px, py, 0.5 );
+        },
+
+        tryZoom: function( px, py, zoom ) {
+            var newLevel = this.level * zoom;
+            if( newLevel <= this.source.resolution && newLevel >= this.resolution ) {
+                var l = this.physicalToLogicalHalf( px, py );
+
+                var newOffsetX = zoom * ( this.offset.x + l.lhx ) - l.lhx;
+                var newOffsetY = zoom * ( this.offset.y + l.lhy ) - l.lhy;
+
+                this.level = newLevel;
+                this.offset.x = Math.max( 0, Math.min( newOffsetX, this.level - this.resolution ) );
+                this.offset.y = Math.max( 0, Math.min( newOffsetY, this.level - this.resolution ) );
+
+                this.recompute();
             }
         },
 
-        getDescription: function( x, y ) {
-            x = Math.floor( this.size * x / this.canvas.width );
-            y = Math.floor( this.size * y / this.canvas.height );
-            var d = xy2d( this.size, x, y );
-            return this.squares[ d ].getDescription( this.countries );
+        initialize: function() {
+            var container = $( '#' + this.id );
+            container.append( '<canvas id="' + this.id + '_canvas" width="' + this.size + '" height="' + this.size + '"></canvas>' );
+            container.append( '<div id="' + this.id + '_desc"></div>' );
+
+            var canvas = $( '#' + this.id + '_canvas' );
+            var description = $( '#' + this.id + '_desc' );
+
+            canvas.mousemove( ( function( curve ) { return function( e ) {
+                var px = e.pageX - this.offsetLeft;
+                var py = e.pageY - this.offsetTop;
+                description.html( curve.getDescription( px, py ) );
+            }; } )( this ) );
+
+            canvas.mouseleave( function( e ) {
+                description.html( "" );
+            } );
+
+            canvas.mousewheel( ( function( curve ) { return function( e, delta ) {
+                var px = e.pageX - this.offsetLeft;
+                var py = e.pageY - this.offsetTop;
+
+                if( delta > 0 ) {
+                    curve.zoomIn( px, py );
+                } else {
+                    curve.zoomOut( px, py );
+                }
+            }; } )( this ) );
+
+            this.recompute();
         },
 
-        zoomIn: function( x, y ) {
-            x = Math.floor( this.size * x / this.canvas.width );
-            y = Math.floor( this.size * y / this.canvas.height );
-
-            console.log( "Zoom in", x, y );
+        recompute: function() {
+            this.recomputeSquares();
+            this.draw();
         },
 
-        zoomOut:function( x, y ) {
-            x = Math.floor( this.size * x / this.canvas.width );
-            y = Math.floor( this.size * y / this.canvas.height );
+        recomputeSquares: function() {
+            this.squares = {};
 
-            console.log( "Zoom out", x, y );
+            var valuesPerSquare = this.source.resolution * this.source.resolution / ( this.level * this.level );
+
+            var distances = {};
+            for( var lx = 0; lx < this.resolution; ++lx ) {
+                this.squares[ lx ] = {};
+                for( var ly = 0; ly < this.resolution; ++ly ) {
+                    var distance = this.logicalToDistance( lx, ly );
+                    distances[ distance ] = { lx: lx, ly: ly };
+                }
+            }
+
+            this.source.reset();
+            var sortedDistances = Object.keys( distances ).sort( function( a, b ) { return a - b; } );
+            for( distanceIndex in sortedDistances ) {
+                var distance = sortedDistances[ distanceIndex ];
+                var p = distances[ distance ];
+                var firstValueInSquare = distance * valuesPerSquare;
+                var lastValueInSquare = firstValueInSquare + valuesPerSquare - 1;
+
+                this.squares[ p.lx ][ p.ly ] = this.source.get( firstValueInSquare, lastValueInSquare );
+                this.squares[ p.lx ][ p.ly ].distance = distance;
+            }
         },
     };
 
-    map.recompute();
+    curve.initialize();
 
-    var canvas = $( '#' + canvasId );
-    canvas.mousemove( function( e ) {
-        var x = e.pageX - this.offsetLeft;
-        var y = e.pageY - this.offsetTop;
-        $( '#' + descriptionId ).html( map.getDescription( x, y ) );
-    } );
+    return curve;
+}
 
-    canvas.mouseleave( function( e ) {
-        $( '#' + descriptionId ).html( "" );
-    } );
-
-    canvas.mousewheel( function( e, delta ) {
-        var x = e.pageX - this.offsetLeft;
-        var y = e.pageY - this.offsetTop;
-
-        if( delta > 0 ) {
-            map.zoomIn( x, y );
-        } else {
-            map.zoomOut( x, y );
-        }
-    } );
-
-    return map;
+function IpMap( id, size, resolution ) {
+    $.get( 'data.json', function( data, textStatus, jqXHR ) {
+        HilbertCurve( id, size, resolution, IpCountryDataSource( data ) );
+    }, 'json' );
 }

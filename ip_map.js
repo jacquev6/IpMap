@@ -121,7 +121,7 @@ function IpCountryDataSource( data ) {
 };
 
 function HilbertCurve( id, size, resolution, source ) {
-    curve = {
+    var theCurve = {
         id: id,
         size: size,
         resolution: resolution,
@@ -246,6 +246,30 @@ function HilbertCurve( id, size, resolution, source ) {
             }
         },
 
+        beginScroll: function( px, py ) {
+            this.scrollingOrigin = { px: px, py: py };
+        },
+
+        doScroll: function( px, py ) {
+            var threshold = this.size / this.resolution;
+
+            var deltaX = Math.round( ( this.scrollingOrigin.px - px ) / threshold );
+            this.scrollingOrigin.px -= deltaX * threshold;
+
+            var deltaY = Math.round( ( this.scrollingOrigin.py - py ) / threshold );
+            this.scrollingOrigin.py -= deltaY * threshold;
+
+            if( deltaX != 0 || deltaY != 0 ) {
+                this.offset.x = Math.max( 0, Math.min( this.offset.x + deltaX, this.level - this.resolution ) );
+                this.offset.y = Math.max( 0, Math.min( this.offset.y + deltaY, this.level - this.resolution ) );
+
+                this.recompute();
+            }
+        },
+
+        endScroll: function( px, py ) {
+        },
+
         initialize: function() {
             var container = $( '#' + this.id );
             container.append( '<canvas id="' + this.id + '_canvas" width="' + this.size + '" height="' + this.size + '"></canvas>' );
@@ -273,6 +297,20 @@ function HilbertCurve( id, size, resolution, source ) {
                 } else {
                     curve.zoomOut( px, py );
                 }
+            }; } )( this ) );
+
+            var scroll = ( function( curve ) { return function( e ) {
+                curve.doScroll( e.pageX, e.pageY );
+            }; } )( this );
+
+            canvas.mousedown( ( function( curve ) { return function( e ) {
+                curve.beginScroll( e.pageX, e.pageY );
+                canvas.on( 'mousemove', scroll );
+            }; } )( this ) );
+
+            $( 'body' ).mouseup( ( function( curve ) { return function( e ) {
+                curve.endScroll( e.pageX, e.pageY );
+                canvas.off( 'mousemove', scroll );
             }; } )( this ) );
 
             this.recompute();
@@ -311,9 +349,9 @@ function HilbertCurve( id, size, resolution, source ) {
         },
     };
 
-    curve.initialize();
+    theCurve.initialize();
 
-    return curve;
+    return theCurve;
 }
 
 function IpMap( id, size, resolution ) {

@@ -97,9 +97,14 @@ function IpCountryDataSource( data ) {
             }
 
             var description = '<p>Addresses ' + ipStringFromInteger( low ) + ' to ' + ipStringFromInteger( high ) + '</p><ul>';
+            var sortedCountries = [];
             for( countryCode in countries ) {
                 var score = countries[ countryCode ];
-                description += '<li>' + this.countries[ countryCode ].name + ': ' + score + ' addresses</li>';
+                sortedCountries.push( { code: countryCode, score: score } );
+            }
+            sortedCountries = sortedCountries.sort( function( a, b ) { return b.score - a.score; } );
+            for( index in sortedCountries ) {
+                description += '<li>' + this.countries[ sortedCountries[ index ].code ].name + ': ' + sortedCountries[ index ].score + ' addresses</li>';
             }
             description += '</ul>';
 

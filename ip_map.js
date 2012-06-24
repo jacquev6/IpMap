@@ -61,7 +61,10 @@ function IpCountryDataSource( data ) {
                     countries[ range.countryCode ] = 0;
                 }
 
-                countries[ range.countryCode ] += Math.min( range.lastIp, high ) - Math.max( range.firstIp, low ) + 1;
+                var addresses = Math.min( range.lastIp, high ) - Math.max( range.firstIp, low ) + 1;
+                if( addresses > 0 ) {
+                    countries[ range.countryCode ] += addresses;
+                }
 
                 if( countries[ range.countryCode ] > bestCountryScore ) {
                     bestCountryScore = countries[ range.countryCode ];

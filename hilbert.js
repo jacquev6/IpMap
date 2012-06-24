@@ -7,8 +7,8 @@ function xy2d( n, x, y ) {
         var ry = ( y & s ) > 0;
         d += s * s * ( ( 3 * rx ) ^ ry );
         var xy = rot( s, x, y, rx, ry );
-        x = xy[ 0 ];
-        y = xy[ 1 ];
+        x = xy.x;
+        y = xy.y;
     }
     return d;
 }
@@ -28,7 +28,7 @@ function d2xy( n, d ) {
         y += s * ry;
         t /= 4;
     }
-    return [ x, y ]
+    return { x: x, y: y };
 }
 
 //rotate/flip a quadrant appropriately
@@ -42,7 +42,7 @@ function rot( n, x, y, rx, ry ) {
         x = y;
         y = t;
     }
-    return [ x, y ]
+    return { x: x, y: y };
 }
 
 function RainbowDataSource() {

@@ -53,7 +53,6 @@ function RainbowDataSource() {
             var color = hsvToHex( 360 * fraction, 0.5, 1 );
             return {
                 color: '#' + color,
-                description: '<p>' + low + ' -> ' + high + '</p>',
             };
         },
         reset: function() {
@@ -63,7 +62,7 @@ function RainbowDataSource() {
 
 function HilbertCurve( id, size, resolution, source ) {
     var theCurve = {
-        id: id,
+        canvas: $( '#' + id ),
         size: size,
         resolution: resolution,
         source: source,
@@ -118,7 +117,7 @@ function HilbertCurve( id, size, resolution, source ) {
         },
 
         draw: function() {
-            var ctx = document.getElementById( this.id + '_canvas' ).getContext( '2d' );
+            var ctx = this.canvas.get( 0 ).getContext( '2d' );
 
             ctx.fillStyle = 'grey';
             ctx.fillRect( 0, 0, this.size, this.size );
@@ -156,11 +155,6 @@ function HilbertCurve( id, size, resolution, source ) {
                 }
             }
             ctx.stroke();
-        },
-
-        getDescription: function( px, py ) {
-            var l = this.physicalToLogical( px, py );
-            return this.squares[ l.lx ][ l.ly ].description;
         },
 
         zoomIn: function( px, py ) {
@@ -211,25 +205,26 @@ function HilbertCurve( id, size, resolution, source ) {
         endScroll: function( px, py ) {
         },
 
-        initialize: function() {
-            var container = $( '#' + this.id );
-            container.append( '<canvas id="' + this.id + '_canvas" width="' + this.size + '" height="' + this.size + '"></canvas>' );
-            container.append( '<div id="' + this.id + '_desc"></div>' );
-
-            var canvas = $( '#' + this.id + '_canvas' );
-            var description = $( '#' + this.id + '_desc' );
-
-            canvas.mousemove( ( function( curve ) { return function( e ) {
+        mousemove: function( callback ) {
+            this.canvas.mousemove( ( function( curve ) { return function( e ) {
                 var px = e.pageX - this.offsetLeft;
                 var py = e.pageY - this.offsetTop;
-                description.html( curve.getDescription( px, py ) );
+
+                var l = curve.physicalToLogical( px, py );
+                var square = curve.squares[ l.lx ][ l.ly ];
+                callback( l.lx, l.ly, square );
             }; } )( this ) );
+        },
 
-            canvas.mouseleave( function( e ) {
-                description.html( "" );
-            } );
+        mouseleave: function( callback ) {
+            this.canvas.mouseleave( callback );
+        },
 
-            canvas.mousewheel( ( function( curve ) { return function( e, delta ) {
+        initialize: function() {
+            this.canvas.attr( 'width', this.size );
+            this.canvas.attr( 'height', this.size );
+
+            this.canvas.mousewheel( ( function( curve ) { return function( e, delta ) {
                 var px = e.pageX - this.offsetLeft;
                 var py = e.pageY - this.offsetTop;
 
@@ -244,14 +239,14 @@ function HilbertCurve( id, size, resolution, source ) {
                 curve.doScroll( e.pageX, e.pageY );
             }; } )( this );
 
-            canvas.mousedown( ( function( curve ) { return function( e ) {
+            this.canvas.mousedown( ( function( curve ) { return function( e ) {
                 curve.beginScroll( e.pageX, e.pageY );
-                canvas.on( 'mousemove', scroll );
+                curve.canvas.on( 'mousemove', scroll );
             }; } )( this ) );
 
             $( 'body' ).mouseup( ( function( curve ) { return function( e ) {
                 curve.endScroll( e.pageX, e.pageY );
-                canvas.off( 'mousemove', scroll );
+                curve.canvas.off( 'mousemove', scroll );
             }; } )( this ) );
 
             this.recompute();

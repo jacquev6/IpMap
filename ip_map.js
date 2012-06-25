@@ -111,6 +111,16 @@ function IpCountryDataSource( data ) {
 
 function IpMap( id, size, resolution ) {
     $.get( 'data.json', function( data, textStatus, jqXHR ) {
-        HilbertCurve( id, size, resolution, IpCountryDataSource( data ) );
+        var curve = HilbertCurve( id + '_canvas', size, resolution, IpCountryDataSource( data ) );
+
+        var description = $( '#' + id + '_desc' );
+
+        curve.mousemove( function( x, y, square ) {
+            description.html( square.description );
+        } );
+
+        curve.mouseleave( function() {
+            description.html( "" );
+        } );
     }, 'json' );
 }

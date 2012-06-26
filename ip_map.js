@@ -87,13 +87,21 @@ function IpCountryDataSource( data ) {
 
             var description = '<p>Addresses ' + ipStringFromInteger( low ) + ' to ' + ipStringFromInteger( high ) + '</p><ul>';
             var sortedCountries = [];
-            for( countryCode in countries ) {
+            for( var countryCode in countries ) {
                 var score = countries[ countryCode ];
                 sortedCountries.push( { code: countryCode, score: score } );
             }
             sortedCountries = sortedCountries.sort( function( a, b ) { return b.score - a.score; } );
-            for( index in sortedCountries ) {
-                description += '<li>' + this.countries[ sortedCountries[ index ].code ].name + ': ' + sortedCountries[ index ].score + ' addresses</li>';
+            var otherCountries = 0;
+            for( var index in sortedCountries ) {
+                if( index < 16 ) {
+                    description += '<li>' + this.countries[ sortedCountries[ index ].code ].name + ': ' + sortedCountries[ index ].score + ' addresses</li>';
+                } else {
+                    otherCountries += sortedCountries[ index ].score;
+                }
+            }
+            if( otherCountries > 0 ) {
+                description += '<li>Other countries: ' + otherCountries + ' addresses</li>';
             }
             description += '</ul>';
 

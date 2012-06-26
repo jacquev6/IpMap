@@ -273,7 +273,7 @@ function HilbertCurve( id, size, resolution, source ) {
 
             this.source.reset();
             var sortedDistances = Object.keys( distances ).sort( function( a, b ) { return a - b; } );
-            for( distanceIndex in sortedDistances ) {
+            for( var distanceIndex in sortedDistances ) {
                 var distance = sortedDistances[ distanceIndex ];
                 var p = distances[ distance ];
                 var firstValueInSquare = distance * valuesPerSquare;

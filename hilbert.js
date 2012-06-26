@@ -170,8 +170,8 @@ function HilbertCurve( id, size, resolution, source ) {
             if( newLevel <= this.source.resolution && newLevel >= this.resolution ) {
                 var l = this.physicalToLogicalHalf( px, py );
 
-                var newOffsetX = zoom * ( this.offset.x + l.lhx ) - l.lhx;
-                var newOffsetY = zoom * ( this.offset.y + l.lhy ) - l.lhy;
+                var newOffsetX = Math.round( zoom * ( this.offset.x + l.lhx ) - l.lhx );
+                var newOffsetY = Math.round( zoom * ( this.offset.y + l.lhy ) - l.lhy );
 
                 this.level = newLevel;
                 this.offset.x = Math.max( 0, Math.min( newOffsetX, this.level - this.resolution ) );

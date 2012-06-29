@@ -231,7 +231,11 @@ function IpMap( id, size, resolution ) {
         + '<input type="radio" name="display" value="continents" checked="checked" />Continents<br />'
         + '<input type="radio" name="display" value="regions" />Regions<br />'
         + '<input type="radio" name="display" value="countries" />Countries<br />'
-        + '</p></form>'
+        + '</p>'
+        + '<div class="continents legend"></div>'
+        + '<div class="regions legend"></div>'
+        + '<div class="countries legend"></div>'
+        + '</form>'
         + '<div class="desc"></div>'
     );
 
@@ -239,6 +243,13 @@ function IpMap( id, size, resolution ) {
     canvas.css( 'margin', '10px' );
     canvas.css( 'margin-right', '50px' );
     canvas.css( 'float', 'left' );
+    $( 'form', parent ).css( 'float', 'left' );
+
+    var legends = $( '.legend', parent );
+    legends.hide();
+    var continents_legend = $( '.continents', parent );
+    var regions_legend = $( '.regions', parent );
+    continents_legend.show();
 
     var description = $( '.desc', parent );
 
@@ -246,6 +257,20 @@ function IpMap( id, size, resolution ) {
         var source = IpCountryDataSource( data );
         source.activateContinents();
         var curve = HilbertCurve( canvas, size, resolution, source );
+
+        var legend = "<p>Continents:";
+        $.each( source.continents, function( index, continent ) {
+            legend += '<br /><span style="background-color: #' + hsvToHex( continent.hue.center, 1, 1 ) + '">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> ' + continent.name;
+        } );
+        legend += '</p>';
+        continents_legend.append( legend );
+
+        legend = "<p>Regions:";
+        $.each( source.regions, function( index, region ) {
+            legend += '<br /><span style="background-color: #' + hsvToHex( region.hue.center, 1, 1 ) + '">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> ' + region.name;
+        } );
+        legend += '</p>';
+        regions_legend.append( legend );
 
         $( 'input[name="display"]', parent ).change( function() {
             var display = $( 'input[name="display"]:checked', parent ).val();
@@ -256,6 +281,8 @@ function IpMap( id, size, resolution ) {
             } else {
                 source.activateContinents();
             }
+            legends.hide();
+            $( '.' + display, parent ).show();
             curve.recompute();
         } );
 

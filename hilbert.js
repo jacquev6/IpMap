@@ -60,9 +60,9 @@ function RainbowDataSource() {
     };
 }
 
-function HilbertCurve( id, size, resolution, source ) {
+function HilbertCurve( canvas, size, resolution, source ) {
     var theCurve = {
-        canvas: $( '#' + id ),
+        canvas: canvas,
         size: size,
         resolution: resolution,
         source: source,

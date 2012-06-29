@@ -6,35 +6,23 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>BrowseIpMap</title>
 
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-<script type="text/javascript" src="https://raw.github.com/brandonaaron/jquery-mousewheel/master/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="jquery.mousewheel.js"></script>
 <script type="text/javascript" src="hilbert.js"></script>
 <script type="text/javascript" src="color.js"></script>
 <script type="text/javascript" src="ip_map.js"></script>
 <script type="text/javascript">
     $( document ).ready( function() {
         IpMap( 'map', 512, 16 );
+        IpMap( 'map2', 512, 16 );
     } );
 </script>
-
-<style type="text/css">
-#map_canvas {
-    float: left;
-    margin: 50px;
-}
-
-#map_desc {
-    float: left;
-}
-</style>
 
 </head>
 <body>
 
-<div id="map">
-<canvas id="map_canvas"></canvas>
-<div id="map_desc"></div>
-</div>
+<div id="map" style="background-color: #9999FF"></div>
+<div id="map2" style="background-color: #99FF99"></div>
 
 </body>
 </html>

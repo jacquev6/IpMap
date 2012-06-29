@@ -1,57 +1,99 @@
 #!/usr/bin/env python
 
-# See http://cloford.com/resources/codes/index.htm for the country -> continent mapping
-
+import os
 import sys
 import json
 import urllib2
 import zipfile
 import io
+import collections
+import HTMLParser
 
-# See http://www.maxmind.com/app/geolite for the ip -> country mapping
-archiveName = "http://geolite.maxmind.com/download/geoip/database/GeoIPCountryCSV.zip"
+Continent = collections.namedtuple( "Continent", [ "code", "name" ] )
+Region = collections.namedtuple( "Region", [ "code", "name", "continent" ] )
+Country = collections.namedtuple( "Country", [ "code", "name", "region" ] )
+Range = collections.namedtuple( "Range", [ "low", "high", "country" ] )
 
-archive = zipfile.ZipFile( io.BytesIO( urllib2.urlopen( archiveName ).read() ) )
+def identifier( n ):
+    return chr( ord( "A" ) + n / 26 ) + chr( ord( "A" ) + n % 26 )
 
-csvFileName = ""
-for member in archive.namelist():
-    if member.endswith( ".csv" ):
-        if csvFileName == "":
-            csvFileName = member
-        else:
-            print "The archive", archiveName, "contains several csv files (at least '" + csvFileName + "' and '" + member + "'"
-            exit( 1 )
+class Initializer:
+    def run( self ):
+        self.download( "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" )
+        self.download( "https://raw.github.com/brandonaaron/jquery-mousewheel/master/jquery.mousewheel.js" )
+        self.extractGeography()
+        self.extractIpCountryMapping()
+        self.dump()
 
-countries = dict()
-ranges = list()
-highest = -1
-for line in archive.open( csvFileName ):
-    line = line.strip()[ 1:-1 ].split( '","' )
-    assert len( line ) == 6, line
+    def extractGeography( self ):
+        self.continents = list()
+        self.regions = list()
+        self.countries = list()
+        # See http://cloford.com/resources/codes/index.htm
+        with open( "geography.txt", "r" ) as geography:
+            for line in geography:
+                continentName, regionName, countryName, countryCode = line.strip().split( "\t" )
+                if len( self.continents ) == 0 or continentName != self.continents[ -1 ].name:
+                    self.continents.append( Continent( "c" + identifier( len( self.continents ) ), continentName ) )
+                if len( self.regions ) == 0 or regionName != self.regions[ -1 ].name:
+                    self.regions.append( Region( "r" + identifier( len( self.regions ) ), regionName, self.continents[ -1 ].code ) )
+                assert all( country.code != countryCode for country in self.countries ), ( countryCode, countryName )
+                assert all( country.name != countryName for country in self.countries ), ( countryCode, countryName )
+                self.countries.append( Country( countryCode, countryName, self.regions[ -1 ].code ) )
 
-    low = int( line[ 2 ] )
-    high = int( line[ 3 ] )
-    assert highest < low <= high
-    highest = high
-    countryCode = line[ 4 ]
-    countryName = line[ 5 ]
+    def extractIpCountryMapping( self ):
+        usefullCountryCodes = set()
+        archiveName = self.download( "http://geolite.maxmind.com/download/geoip/database/GeoIPCountryCSV.zip" )
+        archive = zipfile.ZipFile( archiveName )
 
-    if countryCode in countries:
-        assert countries[ countryCode ] == countryName
-    else:
-        countries[ countryCode ] = countryName
+        csvFileName = ""
+        for member in archive.namelist():
+            if member.endswith( ".csv" ):
+                if csvFileName == "":
+                    csvFileName = member
+                else:
+                    print "The archive", archiveName, "contains several csv files (at least '" + csvFileName + "' and '" + member + "'"
+                    exit( 1 )
 
-    ranges.append( [
-        low,
-        high,
-        countryCode,
-    ] )
+        self.ranges = list()
+        highest = 0
+        for line in archive.open( csvFileName ):
+            line = line.strip()[ 1:-1 ].split( '","' )
+            assert len( line ) == 6, line
 
-json.dump(
-    {
-        "ranges": ranges,
-        "countries": countries,
-    },
-    open( "data.json", "wb" ),
-    separators = ( ',', ':' )
-)
+            low = int( line[ 2 ] )
+            high = int( line[ 3 ] )
+            assert highest < low <= high
+            highest = high
+            countryCode = line[ 4 ]
+            countryName = line[ 5 ]
+
+            usefullCountryCodes.add( countryCode )
+
+            assert any( country.code == countryCode and country.name == countryName for country in self.countries ), ( countryName, countryCode )
+
+            self.ranges.append( Range( low, high, countryCode ) )
+
+        for country in self.countries:
+            assert country.code in usefullCountryCodes, country
+
+    def download( self, url, name = None ):
+        if name is None:
+            name = url.split( "/" )[ -1 ]
+        if not os.path.exists( name ):
+            open( name, "wb" ).write( urllib2.urlopen( url ).read() )
+        return name
+
+    def dump( self ):
+        json.dump(
+            {
+                "continents": self.continents,
+                "regions": self.regions,
+                "countries": self.countries,
+                "ranges": self.ranges,
+            },
+            open( "data.json", "wb" ),
+            separators = ( ',', ':' )
+        )
+
+Initializer().run()

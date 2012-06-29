@@ -1,0 +1,250 @@
+Africa	Central Africa	Burundi	BI
+Africa	Central Africa	Central African Republic	CF
+Africa	Central Africa	Chad	TD
+Africa	Central Africa	Congo	CG
+Africa	Central Africa	Congo, The Democratic Republic of the	CD
+Africa	Central Africa	Rwanda	RW
+Africa	Eastern Africa	Djibouti	DJ
+Africa	Eastern Africa	Eritrea	ER
+Africa	Eastern Africa	Ethiopia	ET
+Africa	Eastern Africa	Kenya	KE
+Africa	Eastern Africa	Somalia	SO
+Africa	Eastern Africa	Tanzania, United Republic of	TZ
+Africa	Eastern Africa	Uganda	UG
+Africa	Indian Ocean	Comoros	KM
+Africa	Indian Ocean	Madagascar	MG
+Africa	Indian Ocean	Mauritius	MU
+Africa	Indian Ocean	Mayotte	YT
+Africa	Indian Ocean	Reunion	RE
+Africa	Indian Ocean	Seychelles	SC
+Africa	Northern Africa	Algeria	DZ
+Africa	Northern Africa	Egypt	EG
+Africa	Northern Africa	Libyan Arab Jamahiriya	LY
+Africa	Northern Africa	Morocco	MA
+Africa	Northern Africa	Sudan	SD
+Africa	Northern Africa	Tunisia	TN
+Africa	Northern Africa	Western Sahara	EH
+Africa	Southern Africa	Angola	AO
+Africa	Southern Africa	Botswana	BW
+Africa	Southern Africa	Lesotho	LS
+Africa	Southern Africa	Malawi	MW
+Africa	Southern Africa	Mozambique	MZ
+Africa	Southern Africa	Namibia	NA
+Africa	Southern Africa	South Africa	ZA
+Africa	Southern Africa	Swaziland	SZ
+Africa	Southern Africa	Zambia	ZM
+Africa	Southern Africa	Zimbabwe	ZW
+Africa	Western Africa	Benin	BJ
+Africa	Western Africa	Burkina Faso	BF
+Africa	Western Africa	Cameroon	CM
+Africa	Western Africa	Cape Verde	CV
+Africa	Western Africa	Cote D'Ivoire	CI
+Africa	Western Africa	Equatorial Guinea	GQ
+Africa	Western Africa	Gabon	GA
+Africa	Western Africa	Gambia	GM
+Africa	Western Africa	Ghana	GH
+Africa	Western Africa	Guinea	GN
+Africa	Western Africa	Guinea-Bissau	GW
+Africa	Western Africa	Liberia	LR
+Africa	Western Africa	Mali	ML
+Africa	Western Africa	Mauritania	MR
+Africa	Western Africa	Niger	NE
+Africa	Western Africa	Nigeria	NG
+Africa	Western Africa	Sao Tome and Principe	ST
+Africa	Western Africa	Senegal	SN
+Africa	Western Africa	Sierra Leone	SL
+Africa	Western Africa	Togo	TG
+Americas	Central America	Belize	BZ
+Americas	Central America	Costa Rica	CR
+Americas	Central America	El Salvador	SV
+Americas	Central America	Guatemala	GT
+Americas	Central America	Honduras	HN
+Americas	Central America	Mexico	MX
+Americas	Central America	Nicaragua	NI
+Americas	Central America	Panama	PA
+Americas	North America	Canada	CA
+Americas	North America	Greenland	GL
+Americas	North America	Saint Pierre and Miquelon	PM
+Americas	North America	United States	US
+Americas	South America	Argentina	AR
+Americas	South America	Bolivia	BO
+Americas	South America	Brazil	BR
+Americas	South America	Chile	CL
+Americas	South America	Colombia	CO
+Americas	South America	Ecuador	EC
+Americas	South America	Falkland Islands (Malvinas)	FK
+Americas	South America	French Guiana	GF
+Americas	South America	Guyana	GY
+Americas	South America	Paraguay	PY
+Americas	South America	Peru	PE
+Americas	South America	Suriname	SR
+Americas	South America	Uruguay	UY
+Americas	South America	Venezuela	VE
+Americas	West Indies	Anguilla	AI
+Americas	West Indies	Antigua and Barbuda	AG
+Americas	West Indies	Aruba	AW
+Americas	West Indies	Bahamas	BS
+Americas	West Indies	Barbados	BB
+Americas	West Indies	Bermuda	BM
+Americas	West Indies	Cayman Islands	KY
+Americas	West Indies	Cuba	CU
+Americas	West Indies	Dominica	DM
+Americas	West Indies	Dominican Republic	DO
+Americas	West Indies	Grenada	GD
+Americas	West Indies	Guadeloupe	GP
+Americas	West Indies	Haiti	HT
+Americas	West Indies	Jamaica	JM
+Americas	West Indies	Martinique	MQ
+Americas	West Indies	Montserrat	MS
+Americas	West Indies	Netherlands Antilles	AN
+Americas	West Indies	Puerto Rico	PR
+Americas	West Indies	Saint Barthelemy	BL
+Americas	West Indies	Saint Kitts and Nevis	KN
+Americas	West Indies	Saint Lucia	LC
+Americas	West Indies	Saint Martin	MF
+Americas	West Indies	Saint Vincent and the Grenadines	VC
+Americas	West Indies	Trinidad and Tobago	TT
+Americas	West Indies	Turks and Caicos Islands	TC
+Americas	West Indies	Virgin Islands, British	VG
+Americas	West Indies	Virgin Islands, U.S.	VI
+Antarctica	Antarctica	Antarctica	AQ
+Asia	Asia/Pacific	Asia/Pacific Region	AP
+Asia	Central Asia	Kazakhstan	KZ
+Asia	Central Asia	Kyrgyzstan	KG
+Asia	Central Asia	Tajikistan	TJ
+Asia	Central Asia	Turkmenistan	TM
+Asia	Central Asia	Uzbekistan	UZ
+Asia	East Asia	China	CN
+Asia	East Asia	Hong Kong	HK
+Asia	East Asia	Japan	JP
+Asia	East Asia	Korea, Democratic People's Republic of	KP
+Asia	East Asia	Korea, Republic of	KR
+Asia	East Asia	Macau	MO
+Asia	East Asia	Taiwan	TW
+Asia	Northern Asia	Mongolia	MN
+Asia	Northern Asia	Russian Federation	RU
+Asia	South Asia	Afghanistan	AF
+Asia	South Asia	Bangladesh	BD
+Asia	South Asia	Bhutan	BT
+Asia	South Asia	British Indian Ocean Territory	IO
+Asia	South Asia	India	IN
+Asia	South Asia	Maldives	MV
+Asia	South Asia	Nepal	NP
+Asia	South Asia	Pakistan	PK
+Asia	South Asia	Sri Lanka	LK
+Asia	South East Asia	Brunei Darussalam	BN
+Asia	South East Asia	Cambodia	KH
+Asia	South East Asia	Christmas Island	CX
+Asia	South East Asia	Cocos (Keeling) Islands	CC
+Asia	South East Asia	Indonesia	ID
+Asia	South East Asia	Lao People's Democratic Republic	LA
+Asia	South East Asia	Malaysia	MY
+Asia	South East Asia	Myanmar	MM
+Asia	South East Asia	Philippines	PH
+Asia	South East Asia	Singapore	SG
+Asia	South East Asia	Thailand	TH
+Asia	South East Asia	Timor-Leste	TL
+Asia	South East Asia	Vietnam	VN
+Asia	South West Asia	Armenia	AM
+Asia	South West Asia	Azerbaijan	AZ
+Asia	South West Asia	Bahrain	BH
+Asia	South West Asia	Cyprus	CY
+Asia	South West Asia	Georgia	GE
+Asia	South West Asia	Iran, Islamic Republic of	IR
+Asia	South West Asia	Iraq	IQ
+Asia	South West Asia	Israel	IL
+Asia	South West Asia	Jordan	JO
+Asia	South West Asia	Kuwait	KW
+Asia	South West Asia	Lebanon	LB
+Asia	South West Asia	Oman	OM
+Asia	South West Asia	Palestinian Territory, Occupied	PS
+Asia	South West Asia	Qatar	QA
+Asia	South West Asia	Saudi Arabia	SA
+Asia	South West Asia	Syrian Arab Republic	SY
+Asia	South West Asia	Turkey	TR
+Asia	South West Asia	United Arab Emirates	AE
+Asia	South West Asia	Yemen	YE
+Atlantic Ocean	South Atlantic Ocean	Bouvet Island	BV
+Atlantic Ocean	South Atlantic Ocean	Saint Helena	SH
+Atlantic Ocean	South Atlantic Ocean	South Georgia and the South Sandwich Islands	GS
+Europe	Central Europe	Austria	AT
+Europe	Central Europe	Czech Republic	CZ
+Europe	Central Europe	Hungary	HU
+Europe	Central Europe	Liechtenstein	LI
+Europe	Central Europe	Slovakia	SK
+Europe	Central Europe	Switzerland	CH
+Europe	Eastern Europe	Belarus	BY
+Europe	Eastern Europe	Estonia	EE
+Europe	Eastern Europe	Latvia	LV
+Europe	Eastern Europe	Lithuania	LT
+Europe	Eastern Europe	Moldova, Republic of	MD
+Europe	Eastern Europe	Poland	PL
+Europe	Eastern Europe	Ukraine	UA
+Europe	Europe	Europe	EU
+Europe	Northern Europe	Aland Islands	AX
+Europe	Northern Europe	Denmark	DK
+Europe	Northern Europe	Faroe Islands	FO
+Europe	Northern Europe	Finland	FI
+Europe	Northern Europe	Iceland	IS
+Europe	Northern Europe	Norway	NO
+Europe	Northern Europe	Svalbard and Jan Mayen	SJ
+Europe	Northern Europe	Sweden	SE
+Europe	South East Europe	Albania	AL
+Europe	South East Europe	Bosnia and Herzegovina	BA
+Europe	South East Europe	Bulgaria	BG
+Europe	South East Europe	Croatia	HR
+Europe	South East Europe	Greece	GR
+Europe	South East Europe	Macedonia	MK
+Europe	South East Europe	Montenegro	ME
+Europe	South East Europe	Romania	RO
+Europe	South East Europe	Serbia	RS
+Europe	South East Europe	Slovenia	SI
+Europe	South West Europe	Andorra	AD
+Europe	South West Europe	Gibraltar	GI
+Europe	South West Europe	Portugal	PT
+Europe	South West Europe	Spain	ES
+Europe	Southern Europe	Holy See (Vatican City State)	VA
+Europe	Southern Europe	Italy	IT
+Europe	Southern Europe	Malta	MT
+Europe	Southern Europe	San Marino	SM
+Europe	Western Europe	Belgium	BE
+Europe	Western Europe	France	FR
+Europe	Western Europe	Germany	DE
+Europe	Western Europe	Guernsey	GG
+Europe	Western Europe	Ireland	IE
+Europe	Western Europe	Isle of Man	IM
+Europe	Western Europe	Jersey	JE
+Europe	Western Europe	Luxembourg	LU
+Europe	Western Europe	Monaco	MC
+Europe	Western Europe	Netherlands	NL
+Europe	Western Europe	United Kingdom	GB
+Indian Ocean	Southern Indian Ocean	French Southern Territories	TF
+Indian Ocean	Southern Indian Ocean	Heard Island and McDonald Islands	HM
+Oceania	North Pacific Ocean	United States Minor Outlying Islands	UM
+Oceania	Pacific	American Samoa	AS
+Oceania	Pacific	Australia	AU
+Oceania	Pacific	Cook Islands	CK
+Oceania	Pacific	Fiji	FJ
+Oceania	Pacific	French Polynesia	PF
+Oceania	Pacific	Guam	GU
+Oceania	Pacific	Kiribati	KI
+Oceania	Pacific	Marshall Islands	MH
+Oceania	Pacific	Micronesia, Federated States of	FM
+Oceania	Pacific	Nauru	NR
+Oceania	Pacific	New Caledonia	NC
+Oceania	Pacific	New Zealand	NZ
+Oceania	Pacific	Niue	NU
+Oceania	Pacific	Norfolk Island	NF
+Oceania	Pacific	Northern Mariana Islands	MP
+Oceania	Pacific	Palau	PW
+Oceania	Pacific	Papua New Guinea	PG
+Oceania	Pacific	Pitcairn Islands	PN
+Oceania	Pacific	Samoa	WS
+Oceania	Pacific	Solomon Islands	SB
+Oceania	Pacific	Tokelau	TK
+Oceania	Pacific	Tonga	TO
+Oceania	Pacific	Tuvalu	TV
+Oceania	Pacific	Vanuatu	VU
+Oceania	Pacific	Wallis and Futuna	WF
+Unknown continent	Unknown region	Anonymous Proxy	A1
+Unknown continent	Unknown region	Satellite Provider	A2

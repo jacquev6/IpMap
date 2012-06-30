@@ -6,15 +6,15 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>BrowseIpMap</title>
 
-<script type="text/javascript" src="jquery.min.js"></script>
-<script type="text/javascript" src="jquery.mousewheel.js"></script>
-<script type="text/javascript" src="hilbert.js"></script>
-<script type="text/javascript" src="color.js"></script>
-<script type="text/javascript" src="ip_map.js"></script>
+<script type="text/javascript" src="downloads/jquery.min.js"></script>
+<script type="text/javascript" src="downloads/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="src/hilbert.js"></script>
+<script type="text/javascript" src="src/color.js"></script>
+<script type="text/javascript" src="src/ip_map.js"></script>
 <script type="text/javascript">
     $( document ).ready( function() {
-        IpMap( 'map', 512, 16 );
-        IpMap( 'map2', 512, 16 );
+        IpMap( 'map', 512, 16, 'downloads/ip_data.json' );
+        IpMap( 'map2', 512, 16, 'downloads/ip_data.json' );
     } );
 </script>
 

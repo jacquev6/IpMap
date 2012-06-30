@@ -77,9 +77,8 @@ class Initializer:
         for country in self.countries:
             assert country.code in usefullCountryCodes, country
 
-    def download( self, url, name = None ):
-        if name is None:
-            name = url.split( "/" )[ -1 ]
+    def download( self, url ):
+        name = os.path.join( "downloads", url.split( "/" )[ -1 ] )
         if not os.path.exists( name ):
             open( name, "wb" ).write( urllib2.urlopen( url ).read() )
         return name
@@ -92,7 +91,7 @@ class Initializer:
                 "countries": self.countries,
                 "ranges": self.ranges,
             },
-            open( "data.json", "wb" ),
+            open( os.path.join( "data", "ip_data.json" ), "wb" ),
             separators = ( ',', ':' )
         )
 

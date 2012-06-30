@@ -211,7 +211,7 @@ function IpCountryDataSource( data ) {
     };
 };
 
-function IpMap( id, size, resolution ) {
+function IpMap( id, size, resolution, data_url ) {
     function ipStringFromInteger( ip ) {
         return (
             ( ( ip >> 24 ) & 0xFF )
@@ -263,7 +263,7 @@ function IpMap( id, size, resolution ) {
 
     var description = $( '.desc', parent );
 
-    $.get( 'data.json', function( data, textStatus, jqXHR ) {
+    $.get( data_url, function( data, textStatus, jqXHR ) {
         var source = IpCountryDataSource( data );
         source.activateContinents();
         var curve = HilbertCurve( canvas, size, resolution, source );

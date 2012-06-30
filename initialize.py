@@ -84,15 +84,18 @@ class Initializer:
         return name
 
     def dump( self ):
-        json.dump(
-            {
-                "continents": self.continents,
-                "regions": self.regions,
-                "countries": self.countries,
-                "ranges": self.ranges,
-            },
-            open( os.path.join( "data", "ip_data.json" ), "wb" ),
-            separators = ( ',', ':' )
-        )
+        with open( os.path.join( "data", "ip_data.js" ), "wb" ) as f:
+            f.write( "ip_data = " )
+            json.dump(
+                {
+                    "continents": self.continents,
+                    "regions": self.regions,
+                    "countries": self.countries,
+                    "ranges": self.ranges,
+                },
+                f,
+                separators = ( ',', ':' )
+            )
+            f.write( ";" )
 
 Initializer().run()

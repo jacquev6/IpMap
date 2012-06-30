@@ -211,7 +211,7 @@ function IpCountryDataSource( data ) {
     };
 };
 
-function IpMap( id, size, resolution, data_url ) {
+function IpMap( id, size, resolution ) {
     function ipStringFromInteger( ip ) {
         return (
             ( ( ip >> 24 ) & 0xFF )
@@ -263,49 +263,47 @@ function IpMap( id, size, resolution, data_url ) {
 
     var description = $( '.desc', parent );
 
-    $.get( data_url, function( data, textStatus, jqXHR ) {
-        var source = IpCountryDataSource( data );
-        source.activateContinents();
-        var curve = HilbertCurve( canvas, size, resolution, source );
+    var source = IpCountryDataSource( ip_data );
+    source.activateContinents();
+    var curve = HilbertCurve( canvas, size, resolution, source );
 
-        continents_legend.append( buildLegend( 'Continents', source.continents ) );
-        regions_legend.append( buildLegend( 'Regions', source.regions ) );
-        countries_legend.append( buildLegend( 'Countries', source.countries ) );
+    continents_legend.append( buildLegend( 'Continents', source.continents ) );
+    regions_legend.append( buildLegend( 'Regions', source.regions ) );
+    countries_legend.append( buildLegend( 'Countries', source.countries ) );
 
-        $( 'input[name="display"]', parent ).change( function() {
-            var display = $( 'input[name="display"]:checked', parent ).val();
-            if( display == 'countries' ) {
-                source.activateCountries();
-            } else if( display == 'regions' ) {
-                source.activateRegions();
+    $( 'input[name="display"]', parent ).change( function() {
+        var display = $( 'input[name="display"]:checked', parent ).val();
+        if( display == 'countries' ) {
+            source.activateCountries();
+        } else if( display == 'regions' ) {
+            source.activateRegions();
+        } else {
+            source.activateContinents();
+        }
+        legends.hide();
+        $( '.' + display, parent ).show();
+        curve.recompute();
+    } );
+
+    curve.mousemove( function( x, y, square ) {
+        var desc = '<p>Addresses ' + ipStringFromInteger( square.low ) + ' to ' + ipStringFromInteger( square.high ) + ': ' + ( square.high - square.low + 1 ) + ' addresses</p><ul>';
+        var otherGeographies = 0;
+        $.each( square.scores, function( index, scoreAndGeography ) {
+            if( index < 16 ) {
+                desc += '<li>' + scoreAndGeography.geography.name + ': ' + scoreAndGeography.score + ' addresses</li>';
             } else {
-                source.activateContinents();
+                otherGeographies += scoreAndGeography.score;
             }
-            legends.hide();
-            $( '.' + display, parent ).show();
-            curve.recompute();
         } );
+        if( otherGeographies > 0 ) {
+            desc += '<li>Others: ' + otherGeographies + ' addresses</li>';
+        }
+        desc += '</ul>';
 
-        curve.mousemove( function( x, y, square ) {
-            var desc = '<p>Addresses ' + ipStringFromInteger( square.low ) + ' to ' + ipStringFromInteger( square.high ) + ': ' + ( square.high - square.low + 1 ) + ' addresses</p><ul>';
-            var otherGeographies = 0;
-            $.each( square.scores, function( index, scoreAndGeography ) {
-                if( index < 16 ) {
-                    desc += '<li>' + scoreAndGeography.geography.name + ': ' + scoreAndGeography.score + ' addresses</li>';
-                } else {
-                    otherGeographies += scoreAndGeography.score;
-                }
-            } );
-            if( otherGeographies > 0 ) {
-                desc += '<li>Others: ' + otherGeographies + ' addresses</li>';
-            }
-            desc += '</ul>';
+        description.html( desc );
+    } );
 
-            description.html( desc );
-        } );
-
-        curve.mouseleave( function() {
-            description.html( "" );
-        } );
-    }, 'json' );
+    curve.mouseleave( function() {
+        description.html( "" );
+    } );
 }

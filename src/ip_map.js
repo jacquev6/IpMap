@@ -168,12 +168,12 @@ function IpCountryDataSource( data ) {
                     break;
                 }
 
-                if( scoreAndGeographies[ geography.code ] === undefined ) {
-                    scoreAndGeographies[ geography.code ] = { score: 0, geography: geography };
-                }
-
                 var addresses = Math.min( range.high, high ) - Math.max( range.low, low ) + 1;
                 if( addresses > 0 ) {
+                    if( scoreAndGeographies[ geography.code ] === undefined ) {
+                        scoreAndGeographies[ geography.code ] = { score: 0, geography: geography };
+                    }
+
                     scoreAndGeographies[ geography.code ].score += addresses;
                 }
 

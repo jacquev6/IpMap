@@ -1,21 +1,4 @@
-function ipStringFromInteger( ip ) {
-    return (
-        ( ( ip >> 24 ) & 0xFF )
-        + '.' + ( ( ip >> 16 ) & 0xFF )
-        + '.' + ( ( ip >> 8 ) & 0xFF )
-        + '.' + ( ip & 0xFF )
-    );
-}
-
 function IpCountryDataSource( data ) {
-    function HueRange( min, max, index, length ) {
-        return {
-            min: min + ( max - min ) * ( index + 0.0 ) / length,
-            center: min + ( max - min ) * ( index + 0.5 ) / length,
-            max: min + ( max - min ) * ( index + 1.0 ) / length,
-        };
-    }
-
     function Continents( continentsData ) {
         var continentsList = [];
         var continentsByCode = {};
@@ -109,6 +92,14 @@ function IpCountryDataSource( data ) {
     }
 
     function computeHues( continents ) {
+        function HueRange( min, max, index, length ) {
+            return {
+                min: min + ( max - min ) * ( index + 0.0 ) / length,
+                center: min + ( max - min ) * ( index + 0.5 ) / length,
+                max: min + ( max - min ) * ( index + 1.0 ) / length,
+            };
+        }
+
         $.each( continents, function( continentIndex, continent ) {
             continent.hue = HueRange( 0, 360, continentIndex, continents.length );
             $.each( continent.regions, function( regionIndex, region ) {
@@ -221,6 +212,25 @@ function IpCountryDataSource( data ) {
 };
 
 function IpMap( id, size, resolution ) {
+    function ipStringFromInteger( ip ) {
+        return (
+            ( ( ip >> 24 ) & 0xFF )
+            + '.' + ( ( ip >> 16 ) & 0xFF )
+            + '.' + ( ( ip >> 8 ) & 0xFF )
+            + '.' + ( ip & 0xFF )
+        );
+    }
+
+    function buildLegend( title, geographies ) {
+        var legend = '<p>' + title + ':';
+        $.each( geographies, function( index, geography ) {
+            var color = '#' + hsvToHex( geography.hue.center, 1, 1 );
+            legend += ' <span style="white-space: nowrap; border: 2px solid' + color + '"><span style="background-color: ' + color + '">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;' + geography.name + '&nbsp;</span>';
+        } );
+        legend += '</p>';
+        return legend;
+    }
+
     var parent = $( '#' + id );
 
     parent.css( "min-height", size + 20 + 'px' );
@@ -243,12 +253,12 @@ function IpMap( id, size, resolution ) {
     canvas.css( 'margin', '10px' );
     canvas.css( 'margin-right', '50px' );
     canvas.css( 'float', 'left' );
-    $( 'form', parent ).css( 'float', 'left' );
 
     var legends = $( '.legend', parent );
     legends.hide();
     var continents_legend = $( '.continents', parent );
     var regions_legend = $( '.regions', parent );
+    var countries_legend = $( '.countries', parent );
     continents_legend.show();
 
     var description = $( '.desc', parent );
@@ -258,19 +268,9 @@ function IpMap( id, size, resolution ) {
         source.activateContinents();
         var curve = HilbertCurve( canvas, size, resolution, source );
 
-        var legend = "<p>Continents:";
-        $.each( source.continents, function( index, continent ) {
-            legend += '<br /><span style="background-color: #' + hsvToHex( continent.hue.center, 1, 1 ) + '">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> ' + continent.name;
-        } );
-        legend += '</p>';
-        continents_legend.append( legend );
-
-        legend = "<p>Regions:";
-        $.each( source.regions, function( index, region ) {
-            legend += '<br /><span style="background-color: #' + hsvToHex( region.hue.center, 1, 1 ) + '">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> ' + region.name;
-        } );
-        legend += '</p>';
-        regions_legend.append( legend );
+        continents_legend.append( buildLegend( 'Continents', source.continents ) );
+        regions_legend.append( buildLegend( 'Regions', source.regions ) );
+        countries_legend.append( buildLegend( 'Countries', source.countries ) );
 
         $( 'input[name="display"]', parent ).change( function() {
             var display = $( 'input[name="display"]:checked', parent ).val();

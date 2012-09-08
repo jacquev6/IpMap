@@ -169,6 +169,7 @@ function HilbertCurve( canvas, size, resolution, source ) {
             var newLevel = this.level * zoom;
             if( newLevel <= this.source.resolution && newLevel >= this.resolution ) {
                 var l = this.physicalToLogicalHalf( px, py );
+                var p = this.logicalToPhysical( l.lhx, l.lhy );
 
                 var newOffsetX = Math.round( zoom * ( this.offset.x + l.lhx ) - l.lhx );
                 var newOffsetY = Math.round( zoom * ( this.offset.y + l.lhy ) - l.lhy );
@@ -177,7 +178,39 @@ function HilbertCurve( canvas, size, resolution, source ) {
                 this.offset.x = Math.max( 0, Math.min( newOffsetX, this.level - this.resolution ) );
                 this.offset.y = Math.max( 0, Math.min( newOffsetY, this.level - this.resolution ) );
 
-                this.recompute();
+                var image = new Image();
+                image.src = this.canvas.get( 0 ).toDataURL( 'image/png' );
+                var ctx = this.canvas.get( 0 ).getContext( '2d' );
+
+                // jQuery dark magic I don't understand yet...
+                $.cssHooks[ 'animatedScale' ] = {
+                   get: function( elem, computed, extra ) { return 1; },
+                   set: function( elem, value ) { }
+                };
+                $.fx.step.animatedScale = function ( fx ) {
+                    $.style( fx.elem, fx.prop, fx.now );
+                };
+                // end of dark magic
+
+                var self = this;
+                this.canvas.css( 'animatedScale', 1 );
+                this.canvas.animate(
+                    {
+                        'animatedScale': zoom
+                    },
+                    {
+                        duration: 200,
+                        step: function( scale, fx ) {
+                            ctx.clearRect( 0, 0, self.size, self.size );
+                            ctx.save();
+                            ctx.translate( ( 1 - scale ) * p.px, ( 1 - scale ) * p.py );
+                            ctx.scale( scale, scale );
+                            ctx.drawImage( image, 0, 0 );
+                            ctx.restore();
+                        },
+                        complete: function() { self.recompute(); }
+                    }
+                );
             }
         },
 

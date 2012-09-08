@@ -25,56 +25,5 @@
 <div id="map"></div>
 <div id="map2"></div>
 
-<script type="text/javascript">
-    window.onload = function() {
-        var source = drawSource();
-
-        $( "#canvas" ).animate(
-            {
-                foobar: 3.14
-            },
-            {
-                step: function( now, fx ) {
-                    var scale = ( Math.cos( now ) + 3 ) / 4;
-
-                    var ctx = document.getElementById( "canvas" ).getContext( "2d" );
-
-                    ctx.save();
-
-                    ctx.translate( 75 * ( 1 - scale ), 75 * ( 1 - scale ) );
-                    ctx.scale( scale, scale );
-
-                    ctx.clearRect( 0, 0, 150, 150 );
-                    ctx.drawImage( source, 0, 0 );
-
-                    ctx.restore();
-                }
-            }
-        );
-    };
-
-    function drawSource() {
-        var ctx = document.getElementById( "canvas" ).getContext( "2d" );
-
-        ctx.beginPath();
-        ctx.moveTo( 0, 0 );
-        ctx.lineTo( 150, 75 );
-        ctx.lineTo( 0, 150 );
-        ctx.lineTo( 75, 0 );
-        ctx.lineTo( 150, 150 );
-        ctx.lineTo( 0, 75 );
-        ctx.lineTo( 150, 0 );
-        ctx.lineTo( 75, 150 );
-        ctx.lineTo( 0, 0 );
-        ctx.stroke();
-
-        var source = new Image();
-        source.src = document.getElementById( "canvas" ).toDataURL( "image/png" );
-        return source;
-    }
-</script>
-
-<canvas id="canvas" width="150" height="150"></canvas>
-
 </body>
 </html>

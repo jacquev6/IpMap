@@ -25,5 +25,55 @@
 <div id="map"></div>
 <div id="map2"></div>
 
+<script type="text/javascript">
+    var currentTime = 0;
+    var source = null;
+
+    window.onload = function() {
+        drawSource();
+        setInterval( drawTarget, 1000 / 30 );
+    };
+
+    function drawSource() {
+        var ctx = document.getElementById( "canvas" ).getContext( "2d" );
+
+        ctx.beginPath();
+        ctx.moveTo( 0, 0 );
+        ctx.lineTo( 150, 75 );
+        ctx.lineTo( 0, 150 );
+        ctx.lineTo( 75, 0 );
+        ctx.lineTo( 150, 150 );
+        ctx.lineTo( 0, 75 );
+        ctx.lineTo( 150, 0 );
+        ctx.lineTo( 75, 150 );
+        ctx.lineTo( 0, 0 );
+        ctx.stroke();
+
+        source = new Image();
+        source.src = document.getElementById( "canvas" ).toDataURL( "image/png" );
+    }
+
+    function drawTarget()
+    {
+        currentTime += 1 / 30;
+        var sineWave = ( Math.cos( currentTime ) + 3 ) / 4;
+
+        var ctx = document.getElementById( "canvas" ).getContext( "2d" );
+
+        ctx.save();
+
+        ctx.translate( 75 * ( 1 - sineWave ), 75 * ( 1 - sineWave ) );
+        ctx.scale( sineWave, sineWave );
+
+        ctx.clearRect( 0, 0, 150, 150 );
+        ctx.drawImage( source, 0, 0 );
+
+        ctx.restore();
+    }
+
+</script>
+
+<canvas id="canvas" width="150" height="150"></canvas>
+
 </body>
 </html>

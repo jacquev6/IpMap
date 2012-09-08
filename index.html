@@ -26,12 +26,31 @@
 <div id="map2"></div>
 
 <script type="text/javascript">
-    var currentTime = 0;
-    var source = null;
-
     window.onload = function() {
-        drawSource();
-        setInterval( drawTarget, 1000 / 30 );
+        var source = drawSource();
+
+        $( "#canvas" ).animate(
+            {
+                foobar: 3.14
+            },
+            {
+                step: function( now, fx ) {
+                    var scale = ( Math.cos( now ) + 3 ) / 4;
+
+                    var ctx = document.getElementById( "canvas" ).getContext( "2d" );
+
+                    ctx.save();
+
+                    ctx.translate( 75 * ( 1 - scale ), 75 * ( 1 - scale ) );
+                    ctx.scale( scale, scale );
+
+                    ctx.clearRect( 0, 0, 150, 150 );
+                    ctx.drawImage( source, 0, 0 );
+
+                    ctx.restore();
+                }
+            }
+        );
     };
 
     function drawSource() {
@@ -49,28 +68,10 @@
         ctx.lineTo( 0, 0 );
         ctx.stroke();
 
-        source = new Image();
+        var source = new Image();
         source.src = document.getElementById( "canvas" ).toDataURL( "image/png" );
+        return source;
     }
-
-    function drawTarget()
-    {
-        currentTime += 1 / 30;
-        var sineWave = ( Math.cos( currentTime ) + 3 ) / 4;
-
-        var ctx = document.getElementById( "canvas" ).getContext( "2d" );
-
-        ctx.save();
-
-        ctx.translate( 75 * ( 1 - sineWave ), 75 * ( 1 - sineWave ) );
-        ctx.scale( sineWave, sineWave );
-
-        ctx.clearRect( 0, 0, 150, 150 );
-        ctx.drawImage( source, 0, 0 );
-
-        ctx.restore();
-    }
-
 </script>
 
 <canvas id="canvas" width="150" height="150"></canvas>

@@ -6,7 +6,7 @@ Details
 
 Hilbert curves are described on [Wikipedia](http://en.wikipedia.org/wiki/Hilbert_curve).
 
-Each square on the curve has a hue giving the marority location of its IP addresses, and a saturation giving the part of this location in this square.
+Each square on the curve has a hue giving the majority location of its IP addresses, and a saturation giving the part of this location in this square.
 
 GeoIp data is from [MaxMind](http://www.maxmind.com/app/geolite), and country/region/continent mapping is from [cloford.com](http://cloford.com/resources/codes/index.htm).
 

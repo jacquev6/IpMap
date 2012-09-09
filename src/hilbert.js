@@ -229,14 +229,17 @@ function HilbertCurve( canvas, size, resolution, source ) {
         },
 
         endScroll: function( px, py ) {
-            var threshold = this.size / this.resolution;
-            var deltaX = Math.round( ( this.scrollingOrigin.px - px ) / threshold );
-            var deltaY = Math.round( ( this.scrollingOrigin.py - py ) / threshold );
+            if( this.scrollingOrigin ) {
+                var threshold = this.size / this.resolution;
+                var deltaX = Math.round( ( this.scrollingOrigin.px - px ) / threshold );
+                var deltaY = Math.round( ( this.scrollingOrigin.py - py ) / threshold );
 
-            this.offset.x = Math.max( 0, Math.min( this.offset.x + deltaX, this.level - this.resolution ) );
-            this.offset.y = Math.max( 0, Math.min( this.offset.y + deltaY, this.level - this.resolution ) );
+                this.offset.x = Math.max( 0, Math.min( this.offset.x + deltaX, this.level - this.resolution ) );
+                this.offset.y = Math.max( 0, Math.min( this.offset.y + deltaY, this.level - this.resolution ) );
 
-            this.recompute();
+                this.recompute();
+                this.scrollingOrigin = undefined;
+            }
         },
 
         mousemove: function( callback ) {

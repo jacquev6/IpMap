@@ -192,7 +192,6 @@ function HilbertCurve( canvas, size, resolution, source ) {
                 };
                 // end of dark magic
 
-                var self = this;
                 this.canvas.css( 'animatedScale', 1 );
                 this.canvas.animate(
                     {
@@ -200,15 +199,15 @@ function HilbertCurve( canvas, size, resolution, source ) {
                     },
                     {
                         duration: 200,
-                        step: function( scale, fx ) {
-                            ctx.clearRect( 0, 0, self.size, self.size );
+                        step: ( function( curve ) { return function( scale, fx ) {
+                            ctx.clearRect( 0, 0, curve.size, curve.size );
                             ctx.save();
                             ctx.translate( ( 1 - scale ) * p.px, ( 1 - scale ) * p.py );
                             ctx.scale( scale, scale );
                             ctx.drawImage( image, 0, 0 );
                             ctx.restore();
-                        },
-                        complete: function() { self.recompute(); }
+                        } } )( this ),
+                        complete: ( function( curve ) { return function() { curve.recompute(); } } )( this )
                     }
                 );
             }
@@ -216,26 +215,28 @@ function HilbertCurve( canvas, size, resolution, source ) {
 
         beginScroll: function( px, py ) {
             this.scrollingOrigin = { px: px, py: py };
+            this.scrollingImage = new Image();
+            this.scrollingImage.src = this.canvas.get( 0 ).toDataURL( 'image/png' );
         },
 
         doScroll: function( px, py ) {
-            var threshold = this.size / this.resolution;
-
-            var deltaX = Math.round( ( this.scrollingOrigin.px - px ) / threshold );
-            this.scrollingOrigin.px -= deltaX * threshold;
-
-            var deltaY = Math.round( ( this.scrollingOrigin.py - py ) / threshold );
-            this.scrollingOrigin.py -= deltaY * threshold;
-
-            if( deltaX != 0 || deltaY != 0 ) {
-                this.offset.x = Math.max( 0, Math.min( this.offset.x + deltaX, this.level - this.resolution ) );
-                this.offset.y = Math.max( 0, Math.min( this.offset.y + deltaY, this.level - this.resolution ) );
-
-                this.recompute();
-            }
+            var ctx = this.canvas.get( 0 ).getContext( '2d' );
+            ctx.clearRect( 0, 0, this.size, this.size );
+            ctx.save();
+            ctx.translate( px - this.scrollingOrigin.px, py - this.scrollingOrigin.py );
+            ctx.drawImage( this.scrollingImage, 0, 0 );
+            ctx.restore();
         },
 
         endScroll: function( px, py ) {
+            var threshold = this.size / this.resolution;
+            var deltaX = Math.round( ( this.scrollingOrigin.px - px ) / threshold );
+            var deltaY = Math.round( ( this.scrollingOrigin.py - py ) / threshold );
+
+            this.offset.x = Math.max( 0, Math.min( this.offset.x + deltaX, this.level - this.resolution ) );
+            this.offset.y = Math.max( 0, Math.min( this.offset.y + deltaY, this.level - this.resolution ) );
+
+            this.recompute();
         },
 
         mousemove: function( callback ) {

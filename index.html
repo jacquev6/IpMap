@@ -13,8 +13,25 @@
 <script type="text/javascript" src="data/ip_data.js"></script>
 <script type="text/javascript" src="src/ip_map.js"></script>
 <script type="text/javascript">
+    function parseQueryString( search ) {
+        r = {};
+
+        var parts = search.split( '&' );
+        for( var i in parts ) {
+            if( parts[ i ] != '' ) {
+                nameValue = parts[ i ].split( '=' );
+                r[ nameValue[ 0 ] ] = nameValue[ 1 ];
+            }
+        }
+
+        return r;
+    }
+
     $( document ).ready( function() {
-        IpMap( 'map', 512, 16 );
+        map = IpMap( 'map', 512, 16, parseQueryString( location.search.substr( 1 ) ) );
+        map.change( function( state ) {
+            history.pushState( {}, '', location.href.replace( location.search, '' ) + '?' + $.param( state ) );
+        } );
     } );
 </script>
 

@@ -217,94 +217,142 @@ function IpCountryDataSource( data ) {
     };
 };
 
-function IpMap( id, size, resolution ) {
-    function ipStringFromInteger( ip ) {
-        return (
-            ( ( ip >> 24 ) & 0xFF )
-            + '.' + ( ( ip >> 16 ) & 0xFF )
-            + '.' + ( ( ip >> 8 ) & 0xFF )
-            + '.' + ( ip & 0xFF )
-        );
-    }
+function IpMap( id, size, resolution, state ) {
+    var theMap = {
+        parent: $( '#' + id ),
+        changeCallbacks: [],
+        state: state,
 
-    function ipIntegerFromString( ip ) {
-        parts = ip.split( '.' );
-        return parseInt( parts[ 0 ] ) * 0x01000000 + parseInt( parts[ 1 ] ) * 0x00010000 + parseInt( parts[ 2 ] ) * 0x00000100 + parseInt( parts[ 3 ] ) * 0x00000001;
-    }
+        ipStringFromInteger: function( ip ) {
+            return (
+                ( ( ip >> 24 ) & 0xFF )
+                + '.' + ( ( ip >> 16 ) & 0xFF )
+                + '.' + ( ( ip >> 8 ) & 0xFF )
+                + '.' + ( ip & 0xFF )
+            );
+        },
 
-    var parent = $( '#' + id );
+        ipIntegerFromString: function( ip ) {
+            var parts = ip.split( '.' );
+            return parseInt( parts[ 0 ] ) * 0x01000000 + parseInt( parts[ 1 ] ) * 0x00010000 + parseInt( parts[ 2 ] ) * 0x00000100 + parseInt( parts[ 3 ] ) * 0x00000001;
+        },
 
-    parent.css( "min-height", size + 20 + 'px' );
-    parent.css( "padding", '10px' );
-    parent.append(
-        '<canvas></canvas>'
-        + '<p>Display: '
-        + '<input type="radio" name="display" value="continents" checked="checked" />Continents&nbsp;'
-        + '<input type="radio" name="display" value="regions" />Regions&nbsp;'
-        + '<input type="radio" name="display" value="countries" />Countries'
-        + '</p>'
-        + '<p><input type="checkbox" name="locate_ip" /> Locate an address: <input name="ip_to_locate" value="127.0.0.1" /></p>'
-        + '<div class="desc"></div>'
-    );
-
-    var canvas = $( 'canvas', parent );
-    canvas.css( 'margin', '10px' );
-    canvas.css( 'margin-right', '50px' );
-    canvas.css( 'float', 'left' );
-
-    var description = $( '.desc', parent );
-
-    var source = IpCountryDataSource( ip_data );
-    source.activateContinents();
-    var curve = HilbertCurve( canvas, size, resolution, source );
-
-    $( 'input[name="display"]', parent ).change( function() {
-        var display = $( 'input[name="display"]:checked', parent ).val();
-        if( display == 'countries' ) {
-            source.activateCountries();
-        } else if( display == 'regions' ) {
-            source.activateRegions();
-        } else {
-            source.activateContinents();
-        }
-        curve.recompute();
-    } );
-
-    function locateIp() {
-        if( $( 'input[name="locate_ip"]', parent ).is( ':checked' ) ) {
-            source.locate( ipIntegerFromString( $( 'input[name="ip_to_locate"]', parent ).val() ) );
-        } else {
-            source.locate( -1 );
-        }
-        curve.recompute();
-    }
-    $( 'input[name="locate_ip"]', parent ).change( locateIp );
-    $( 'input[name="ip_to_locate"]', parent ).change( locateIp );
-
-    curve.mousemove( function( x, y, square ) {
-        var numberOfAddresses = square.high - square.low + 1;
-        var desc = '<p>' + numberOfAddresses + ' addresses from ' + ipStringFromInteger( square.low ) + ' to ' + ipStringFromInteger( square.high ) + ':</p><ul>';
-        var otherGeographies = 0;
-        $.each( square.scores, function( index, scoreAndGeography ) {
-            if( index < 16 ) {
-                var color = '#' + hsvToHex( scoreAndGeography.geography.hue.center, 1, 1 );
-                desc += '<li style="margin-top: 4px; margin-bottom: 4px">';
-                desc += '<span style="white-space: nowrap; border: 2px solid ' + color + '"><span style="background-color: ' + color + '">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;' + scoreAndGeography.geography.name + '&nbsp;</span>';
-                desc += ': ' + scoreAndGeography.score + ' addresses (' + Math.round( 10000 * scoreAndGeography.score / numberOfAddresses ) / 100 + '%)';
-                desc += '</li>';
+        onChangeDisplay: function() {
+            var display = $( 'input[name="display"]:checked', this.parent ).val();
+            if( display == 'countries' ) {
+                this.source.activateCountries();
+            } else if( display == 'regions' ) {
+                this.source.activateRegions();
             } else {
-                otherGeographies += scoreAndGeography.score;
+                this.source.activateContinents();
             }
-        } );
-        if( otherGeographies > 0 ) {
-            desc += '<li>Others: ' + otherGeographies + ' addresses</li>';
+            this.state.display = display;
+            this.curve.recompute();
+        },
+
+        onChangeLocate: function() {
+            if( $( 'input[name="locate_ip"]', this.parent ).is( ':checked' ) ) {
+                var ipToLocate = $( 'input[name="ip_to_locate"]', this.parent ).val();
+                this.state.ip_to_locate = ipToLocate;
+                this.source.locate( this.ipIntegerFromString( ipToLocate ) );
+            } else {
+                delete this.state.ip_to_locate;
+                this.source.locate( -1 );
+            }
+            this.curve.recompute();
+        },
+
+        onMouseMove: function( x, y, square ) {
+            var numberOfAddresses = square.high - square.low + 1;
+            var desc = '<p>' + numberOfAddresses + ' addresses from ' + this.ipStringFromInteger( square.low ) + ' to ' + this.ipStringFromInteger( square.high ) + ':</p><ul>';
+            var otherGeographies = 0;
+            $.each( square.scores, function( index, scoreAndGeography ) {
+                if( index < 16 ) {
+                    var color = '#' + hsvToHex( scoreAndGeography.geography.hue.center, 1, 1 );
+                    desc += '<li style="margin-top: 4px; margin-bottom: 4px">';
+                    desc += '<span style="white-space: nowrap; border: 2px solid ' + color + '"><span style="background-color: ' + color + '">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;' + scoreAndGeography.geography.name + '&nbsp;</span>';
+                    desc += ': ' + scoreAndGeography.score + ' addresses (' + Math.round( 10000 * scoreAndGeography.score / numberOfAddresses ) / 100 + '%)';
+                    desc += '</li>';
+                } else {
+                    otherGeographies += scoreAndGeography.score;
+                }
+            } );
+            if( otherGeographies > 0 ) {
+                desc += '<li>Others: ' + otherGeographies + ' addresses</li>';
+            }
+            desc += '</ul>';
+
+            this.description.html( desc );
+        },
+
+        onMouseLeave: function() {
+            this.description.html( '' );
+        },
+
+        initialize: function() {
+            this.parent.css( "min-height", size + 20 + 'px' );
+            this.parent.css( "padding", '10px' );
+            this.parent.append(
+                '<canvas></canvas>'
+                + '<p>Display: '
+                + '<input type="radio" name="display" value="continents" checked="checked" />Continents&nbsp;'
+                + '<input type="radio" name="display" value="regions" />Regions&nbsp;'
+                + '<input type="radio" name="display" value="countries" />Countries'
+                + '</p>'
+                + '<p><input type="checkbox" name="locate_ip" /> Locate an address: <input name="ip_to_locate" value="127.0.0.1" /></p>'
+                + '<div class="desc"></div>'
+            );
+
+            var canvas = $( 'canvas', this.parent );
+            canvas.css( 'margin', '10px' );
+            canvas.css( 'margin-right', '50px' );
+            canvas.css( 'float', 'left' );
+
+            this.description = $( '.desc', this.parent );
+
+            this.source = IpCountryDataSource( ip_data );
+            this.source.activateContinents();
+
+            this.curve = HilbertCurve( canvas, size, resolution, this.source );
+
+            $( 'input[name="display"]', this.parent ).change( ( function( self ) { return function() { self.onChangeDisplay(); } } )( this ) );
+            $( 'input[name="locate_ip"]', this.parent ).change( ( function( self ) { return function() { self.onChangeLocate(); } } )( this ) );
+            $( 'input[name="ip_to_locate"]', this.parent ).change( ( function( self ) { return function() { self.onChangeLocate(); } } )( this ) );
+            this.curve.mousemove( ( function( self ) { return function( x, y, square ) { self.onMouseMove( x, y, square ); } } )( this ) );
+            this.curve.mouseleave( ( function( self ) { return function() { self.onMouseLeave(); } } )( this ) );
+            this.curve.change( ( function( self ) { return function() { self.onChange(); } } )( this ) );
+
+            if( 'display' in this.state ) {
+                $( 'input[name="display"][value="' + this.state.display + '"]', this.parent ).attr( 'checked', 'checked' );
+            }
+            if( 'ip_to_locate' in this.state ) {
+                $( 'input[name="locate_ip"]', this.parent ).attr( 'checked', 'checked' );
+                $( 'input[name="ip_to_locate"]', this.parent ).val( this.state.ip_to_locate );
+            }
+            if( 'offsetX' in this.state ) { this.curve.offset.x = parseInt( this.state.offsetX ); }
+            if( 'offsetY' in this.state ) { this.curve.offset.y = parseInt( this.state.offsetY ); }
+            if( 'level' in this.state ) { this.curve.level = parseInt( this.state.level ); }
+
+            this.onChangeLocate();
+            this.onChangeDisplay();
+        },
+
+        onChange: function () {
+            this.state.offsetX = this.curve.offset.x;
+            this.state.offsetY = this.curve.offset.y;
+            this.state.level = this.curve.level;
+
+            for( var i in this.changeCallbacks ) {
+                this.changeCallbacks[ i ]( this.state );
+            }
+        },
+
+        change: function( callback ) {
+            this.changeCallbacks.push( callback );
         }
-        desc += '</ul>';
+    };
 
-        description.html( desc );
-    } );
+    theMap.initialize();
 
-    curve.mouseleave( function() {
-        description.html( "" );
-    } );
+    return theMap;
 }

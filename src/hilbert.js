@@ -69,6 +69,7 @@ function HilbertCurve( canvas, size, resolution, source ) {
         source: source,
         offset: { x: 0, y: 0 },
         level: resolution,
+        changeCallbacks: [],
 
         // level in [ resolution, size / resolution / 2 ]
         // offset in [ 0, level - resolution ]
@@ -317,6 +318,9 @@ function HilbertCurve( canvas, size, resolution, source ) {
         recompute: function() {
             this.recomputeSquares();
             this.draw();
+            for( var i in this.changeCallbacks ) {
+                this.changeCallbacks[ i ]();
+            }
         },
 
         recomputeSquares: function() {
@@ -344,6 +348,10 @@ function HilbertCurve( canvas, size, resolution, source ) {
                 this.squares[ p.lx ][ p.ly ] = this.source.get( firstValueInSquare, lastValueInSquare );
                 this.squares[ p.lx ][ p.ly ].distance = distance;
             }
+        },
+
+        change: function( callback ) {
+            this.changeCallbacks.push( callback );
         },
     };
 

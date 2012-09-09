@@ -1,4 +1,4 @@
-This is a browsable map showing geographic locations of to IPv4 addresses. It was inspired by http://xkcd.com/195/.
+This is a browsable map showing geographic locations of to IPv4 addresses. It was inspired by [xkcd 195, Map of the Internet](http://xkcd.com/195/).
 You can try it on [vincent-jacques.net](http://vincent-jacques.net/IpMap/)
 
 Details

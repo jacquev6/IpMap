@@ -221,16 +221,6 @@ function IpMap( id, size, resolution ) {
         );
     }
 
-    function buildLegend( title, geographies ) {
-        var legend = '<p>' + title + ':';
-        $.each( geographies, function( index, geography ) {
-            var color = '#' + hsvToHex( geography.hue.center, 1, 1 );
-            legend += ' <span style="white-space: nowrap; border: 2px solid' + color + '"><span style="background-color: ' + color + '">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;' + geography.name + '&nbsp;</span>';
-        } );
-        legend += '</p>';
-        return legend;
-    }
-
     var parent = $( '#' + id );
 
     parent.css( "min-height", size + 20 + 'px' );
@@ -238,13 +228,10 @@ function IpMap( id, size, resolution ) {
     parent.append(
         '<canvas></canvas>'
         + '<form><p>Display:<br />'
-        + '<input type="radio" name="display" value="continents" checked="checked" />Continents<br />'
-        + '<input type="radio" name="display" value="regions" />Regions<br />'
-        + '<input type="radio" name="display" value="countries" />Countries<br />'
+        + '<input type="radio" name="display" value="continents" checked="checked" />Continents&nbsp;'
+        + '<input type="radio" name="display" value="regions" />Regions&nbsp;'
+        + '<input type="radio" name="display" value="countries" />Countries'
         + '</p>'
-        + '<div class="continents legend"></div>'
-        + '<div class="regions legend"></div>'
-        + '<div class="countries legend"></div>'
         + '</form>'
         + '<div class="desc"></div>'
     );
@@ -254,22 +241,11 @@ function IpMap( id, size, resolution ) {
     canvas.css( 'margin-right', '50px' );
     canvas.css( 'float', 'left' );
 
-    var legends = $( '.legend', parent );
-    legends.hide();
-    var continents_legend = $( '.continents', parent );
-    var regions_legend = $( '.regions', parent );
-    var countries_legend = $( '.countries', parent );
-    continents_legend.show();
-
     var description = $( '.desc', parent );
 
     var source = IpCountryDataSource( ip_data );
     source.activateContinents();
     var curve = HilbertCurve( canvas, size, resolution, source );
-
-    continents_legend.append( buildLegend( 'Continents', source.continents ) );
-    regions_legend.append( buildLegend( 'Regions', source.regions ) );
-    countries_legend.append( buildLegend( 'Countries', source.countries ) );
 
     $( 'input[name="display"]', parent ).change( function() {
         var display = $( 'input[name="display"]:checked', parent ).val();
@@ -280,17 +256,20 @@ function IpMap( id, size, resolution ) {
         } else {
             source.activateContinents();
         }
-        legends.hide();
-        $( '.' + display, parent ).show();
         curve.recompute();
     } );
 
     curve.mousemove( function( x, y, square ) {
-        var desc = '<p>Addresses ' + ipStringFromInteger( square.low ) + ' to ' + ipStringFromInteger( square.high ) + ': ' + ( square.high - square.low + 1 ) + ' addresses</p><ul>';
+        var numberOfAddresses = square.high - square.low + 1;
+        var desc = '<p>' + numberOfAddresses + ' addresses from ' + ipStringFromInteger( square.low ) + ' to ' + ipStringFromInteger( square.high ) + ':</p><ul>';
         var otherGeographies = 0;
         $.each( square.scores, function( index, scoreAndGeography ) {
             if( index < 16 ) {
-                desc += '<li>' + scoreAndGeography.geography.name + ': ' + scoreAndGeography.score + ' addresses</li>';
+                var color = '#' + hsvToHex( scoreAndGeography.geography.hue.center, 1, 1 );
+                desc += '<li style="margin-top: 4px; margin-bottom: 4px">';
+                desc += '<span style="white-space: nowrap; border: 2px solid ' + color + '"><span style="background-color: ' + color + '">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;' + scoreAndGeography.geography.name + '&nbsp;</span>';
+                desc += ': ' + scoreAndGeography.score + ' addresses (' + Math.round( 10000 * scoreAndGeography.score / numberOfAddresses ) / 100 + '%)';
+                desc += '</li>';
             } else {
                 otherGeographies += scoreAndGeography.score;
             }

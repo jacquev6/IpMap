@@ -139,6 +139,7 @@ function IpCountryDataSource( data ) {
         reset: function() {
             this.rangeIndex = 0;
         },
+        ipToLocate: -1,
         get: function( low, high ) {
             var scores = this.computeScores( low, high );
 
@@ -150,6 +151,7 @@ function IpCountryDataSource( data ) {
             }
 
             return {
+                highlight: this.ipToLocate >= low && this.ipToLocate <= high,
                 color: color,
                 low: low,
                 high: high,
@@ -204,6 +206,10 @@ function IpCountryDataSource( data ) {
             this.getGeography = function( country ) { return country; };
         },
 
+        locate: function( ipToLocate ) {
+            this.ipToLocate = ipToLocate;
+        },
+
         continents: geographies.continents,
         regions: geographies.regions,
         countries: geographies.countries,
@@ -221,18 +227,23 @@ function IpMap( id, size, resolution ) {
         );
     }
 
+    function ipIntegerFromString( ip ) {
+        parts = ip.split( '.' );
+        return parseInt( parts[ 0 ] ) * 0x01000000 + parseInt( parts[ 1 ] ) * 0x00010000 + parseInt( parts[ 2 ] ) * 0x00000100 + parseInt( parts[ 3 ] ) * 0x00000001;
+    }
+
     var parent = $( '#' + id );
 
     parent.css( "min-height", size + 20 + 'px' );
     parent.css( "padding", '10px' );
     parent.append(
         '<canvas></canvas>'
-        + '<form><p>Display:<br />'
+        + '<p>Display: '
         + '<input type="radio" name="display" value="continents" checked="checked" />Continents&nbsp;'
         + '<input type="radio" name="display" value="regions" />Regions&nbsp;'
         + '<input type="radio" name="display" value="countries" />Countries'
         + '</p>'
-        + '</form>'
+        + '<p><input type="checkbox" name="locate_ip" /> Locate an address: <input name="ip_to_locate" value="127.0.0.1" /></p>'
         + '<div class="desc"></div>'
     );
 
@@ -258,6 +269,17 @@ function IpMap( id, size, resolution ) {
         }
         curve.recompute();
     } );
+
+    function locateIp() {
+        if( $( 'input[name="locate_ip"]', parent ).is( ':checked' ) ) {
+            source.locate( ipIntegerFromString( $( 'input[name="ip_to_locate"]', parent ).val() ) );
+        } else {
+            source.locate( -1 );
+        }
+        curve.recompute();
+    }
+    $( 'input[name="locate_ip"]', parent ).change( locateIp );
+    $( 'input[name="ip_to_locate"]', parent ).change( locateIp );
 
     curve.mousemove( function( x, y, square ) {
         var numberOfAddresses = square.high - square.low + 1;

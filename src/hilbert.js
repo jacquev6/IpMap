@@ -22,8 +22,8 @@ function d2xy( n, d ) {
         var rx = 1 & ( t / 2 );
         var ry = 1 & ( t ^ rx );
         var xy = rot( s, x, y, rx, ry );
-        x = xy[ 0 ];
-        y = xy[ 1 ];
+        x = xy.x;
+        y = xy.y;
         x += s * rx;
         y += s * ry;
         t /= 4;
@@ -53,6 +53,7 @@ function RainbowDataSource() {
             var color = hsvToHex( 360 * fraction, 0.5, 1 );
             return {
                 color: '#' + color,
+                highlight: false,
             };
         },
         reset: function() {
@@ -116,6 +117,14 @@ function HilbertCurve( canvas, size, resolution, source ) {
             return xy2d( this.level, lx + this.offset.x, ly + this.offset.y );
         },
 
+        distanceToLogical: function( d ) {
+            xy = d2xy( this.level, d );
+            return {
+                lx: xy.x - this.offset.x,
+                ly: xy.y - this.offset.y,
+            };
+        },
+
         draw: function() {
             var ctx = this.canvas.get( 0 ).getContext( '2d' );
 
@@ -133,7 +142,8 @@ function HilbertCurve( canvas, size, resolution, source ) {
             }
 
             ctx.beginPath();
-            ctx.fillStyle = 'black';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
             for( var lx = 0; lx < this.resolution - 1; ++lx ) {
                 for( var ly = 0; ly < this.resolution; ++ly ) {
                     if( Math.abs( this.squares[ lx ][ ly ].distance - this.squares[ lx + 1 ][ ly ].distance ) > 1 ) {
@@ -155,6 +165,21 @@ function HilbertCurve( canvas, size, resolution, source ) {
                 }
             }
             ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+            for( var lx = 0; lx < this.resolution; ++lx ) {
+                for( var ly = 0; ly < this.resolution; ++ly ) {
+                    var square = this.squares[ lx ][ ly ];
+
+                    if( square.highlight ) {
+                        var p = this.logicalToPhysical( lx, ly );
+                        ctx.arc( p.px + this.size / this.resolution / 2, p.py + this.size / this.resolution / 2, this.size / this.resolution * 0.75, 0, 2 * Math.PI );
+                    }
+                }
+            }
+            ctx.stroke()
         },
 
         zoomIn: function( px, py ) {
@@ -299,20 +324,20 @@ function HilbertCurve( canvas, size, resolution, source ) {
 
             var valuesPerSquare = this.source.resolution * this.source.resolution / ( this.level * this.level );
 
-            var distances = {};
+            var pointsByDistance = {};
             for( var lx = 0; lx < this.resolution; ++lx ) {
                 this.squares[ lx ] = {};
                 for( var ly = 0; ly < this.resolution; ++ly ) {
                     var distance = this.logicalToDistance( lx, ly );
-                    distances[ distance ] = { lx: lx, ly: ly };
+                    pointsByDistance[ distance ] = { lx: lx, ly: ly };
                 }
             }
 
             this.source.reset();
-            var sortedDistances = Object.keys( distances ).sort( function( a, b ) { return a - b; } );
+            var sortedDistances = Object.keys( pointsByDistance ).sort( function( a, b ) { return a - b; } );
             for( var distanceIndex in sortedDistances ) {
                 var distance = sortedDistances[ distanceIndex ];
-                var p = distances[ distance ];
+                var p = pointsByDistance[ distance ];
                 var firstValueInSquare = distance * valuesPerSquare;
                 var lastValueInSquare = firstValueInSquare + valuesPerSquare - 1;
 

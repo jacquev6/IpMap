@@ -19,8 +19,9 @@ Africa	Indian Ocean	Reunion	RE
 Africa	Indian Ocean	Seychelles	SC
 Africa	Northern Africa	Algeria	DZ
 Africa	Northern Africa	Egypt	EG
-Africa	Northern Africa	Libyan Arab Jamahiriya	LY
+Africa	Northern Africa	Libya	LY
 Africa	Northern Africa	Morocco	MA
+Africa	Northern Africa	South Sudan	SS
 Africa	Northern Africa	Sudan	SD
 Africa	Northern Africa	Tunisia	TN
 Africa	Northern Africa	Western Sahara	EH
@@ -68,9 +69,11 @@ Americas	North America	Saint Pierre and Miquelon	PM
 Americas	North America	United States	US
 Americas	South America	Argentina	AR
 Americas	South America	Bolivia	BO
+Americas	South America	Bonaire, Saint Eustatius and Saba	BQ
 Americas	South America	Brazil	BR
 Americas	South America	Chile	CL
 Americas	South America	Colombia	CO
+Americas	South America	Curacao	CW
 Americas	South America	Ecuador	EC
 Americas	South America	Falkland Islands (Malvinas)	FK
 Americas	South America	French Guiana	GF
@@ -96,13 +99,13 @@ Americas	West Indies	Haiti	HT
 Americas	West Indies	Jamaica	JM
 Americas	West Indies	Martinique	MQ
 Americas	West Indies	Montserrat	MS
-Americas	West Indies	Netherlands Antilles	AN
 Americas	West Indies	Puerto Rico	PR
 Americas	West Indies	Saint Barthelemy	BL
 Americas	West Indies	Saint Kitts and Nevis	KN
 Americas	West Indies	Saint Lucia	LC
 Americas	West Indies	Saint Martin	MF
 Americas	West Indies	Saint Vincent and the Grenadines	VC
+Americas	West Indies	Sint Maarten (Dutch part)	SX
 Americas	West Indies	Trinidad and Tobago	TT
 Americas	West Indies	Turks and Caicos Islands	TC
 Americas	West Indies	Virgin Islands, British	VG
@@ -157,14 +160,13 @@ Asia	South West Asia	Jordan	JO
 Asia	South West Asia	Kuwait	KW
 Asia	South West Asia	Lebanon	LB
 Asia	South West Asia	Oman	OM
-Asia	South West Asia	Palestinian Territory, Occupied	PS
+Asia	South West Asia	Palestinian Territory	PS
 Asia	South West Asia	Qatar	QA
 Asia	South West Asia	Saudi Arabia	SA
 Asia	South West Asia	Syrian Arab Republic	SY
 Asia	South West Asia	Turkey	TR
 Asia	South West Asia	United Arab Emirates	AE
 Asia	South West Asia	Yemen	YE
-Atlantic Ocean	South Atlantic Ocean	Bouvet Island	BV
 Atlantic Ocean	South Atlantic Ocean	Saint Helena	SH
 Atlantic Ocean	South Atlantic Ocean	South Georgia and the South Sandwich Islands	GS
 Europe	Central Europe	Austria	AT
@@ -219,7 +221,6 @@ Europe	Western Europe	Monaco	MC
 Europe	Western Europe	Netherlands	NL
 Europe	Western Europe	United Kingdom	GB
 Indian Ocean	Southern Indian Ocean	French Southern Territories	TF
-Indian Ocean	Southern Indian Ocean	Heard Island and McDonald Islands	HM
 Oceania	North Pacific Ocean	United States Minor Outlying Islands	UM
 Oceania	Pacific	American Samoa	AS
 Oceania	Pacific	Australia	AU

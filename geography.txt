@@ -24,7 +24,6 @@ Africa	Northern Africa	Morocco	MA
 Africa	Northern Africa	South Sudan	SS
 Africa	Northern Africa	Sudan	SD
 Africa	Northern Africa	Tunisia	TN
-Africa	Northern Africa	Western Sahara	EH
 Africa	Southern Africa	Angola	AO
 Africa	Southern Africa	Botswana	BW
 Africa	Southern Africa	Lesotho	LS

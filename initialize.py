@@ -75,7 +75,7 @@ class Initializer:
             self.ranges.append( Range( low, high, countryCode ) )
 
         for country in self.countries:
-            assert country.code in usefullCountryCodes, country
+            assert country.code in usefullCountryCodes, "Remove " + str(country) + " from geography.txt"
 
     def download( self, url ):
         name = os.path.join( "downloads", url.split( "/" )[ -1 ] )

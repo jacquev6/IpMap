@@ -296,8 +296,16 @@ function HilbertCurve( canvas, size, resolution, source ) {
             this.canvas.attr( 'height', this.size );
 
             this.canvas.mousewheel( ( function( curve ) { return function( e, delta ) {
-                var px = e.pageX - this.offsetLeft;
-                var py = e.pageY - this.offsetTop;
+                var px = e.pageX;
+                var py = e.pageY;
+
+                var elem = this;
+                while(elem != null)
+                {
+                    px -= elem.offsetLeft;
+                    py -= elem.offsetTop;
+                    elem = elem.offsetParent;
+                }
 
                 if( delta > 0 ) {
                     curve.zoomIn( px, py );

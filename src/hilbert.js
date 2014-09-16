@@ -270,8 +270,16 @@ function HilbertCurve( canvas, size, resolution, source ) {
 
         mousemove: function( callback ) {
             this.canvas.mousemove( ( function( curve ) { return function( e ) {
-                var px = e.pageX - this.offsetLeft;
-                var py = e.pageY - this.offsetTop;
+                var px = e.pageX;
+                var py = e.pageY;
+
+                var elem = this;
+                while(elem != null)
+                {
+                    px -= elem.offsetLeft;
+                    py -= elem.offsetTop;
+                    elem = elem.offsetParent;
+                }
 
                 var l = curve.physicalToLogical( px, py );
                 var square = curve.squares[ l.lx ][ l.ly ];

@@ -1,44 +1,43 @@
 <!DOCTYPE html>
-
 <html>
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>BrowseIpMap</title>
+    <title>IpMap</title>
+</head>
+<body>
 
-<script type="text/javascript" src="downloads/jquery.min.js"></script>
-<script type="text/javascript" src="downloads/jquery.mousewheel.js"></script>
-<script type="text/javascript" src="src/hilbert.js"></script>
-<script type="text/javascript" src="src/color.js"></script>
-<script type="text/javascript" src="data/ip_data.js"></script>
-<script type="text/javascript" src="src/ip_map.js"></script>
-<script type="text/javascript">
-    function parseQueryString( search ) {
+<div id="map"><p>Loading IpMap...</p></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.rawgit.com/jquery/jquery-mousewheel/33dc8f10/jquery.mousewheel.min.js"></script>
+<script src="ip_data.js"></script>
+<script src="hilbert.js"></script>
+<script src="color.js"></script>
+<script src="ip_map.js"></script>
+
+<script>
+    function parseQueryString(search) {
         r = {};
 
-        var parts = search.split( '&' );
-        for( var i in parts ) {
-            if( parts[ i ] != '' ) {
-                nameValue = parts[ i ].split( '=' );
-                r[ nameValue[ 0 ] ] = nameValue[ 1 ];
+        var parts = search.split('&');
+        for(var i in parts) {
+            if(parts[i] != '') {
+                nameValue = parts[i].split('=');
+                r[nameValue[0]] = nameValue[1];
             }
         }
 
         return r;
     }
 
-    $( document ).ready( function() {
-        map = IpMap( 'map', 512, 16, parseQueryString( location.search.substr( 1 ) ) );
-        map.change( function( state ) {
-            history.pushState( {}, '', location.href.replace( location.search, '' ) + '?' + $.param( state ) );
-        } );
-    } );
+    $(document).ready(function() {
+        map = IpMap('map', 512, 16, parseQueryString(location.search.substr(1)));
+        map.change(function(state) {
+            history.pushState({}, '', location.href.replace(location.search, '') + '?' + $.param(state));
+        });
+    });
 </script>
-
-</head>
-<body>
-
-<div id="map"></div>
 
 </body>
 </html>
